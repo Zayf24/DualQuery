@@ -1,0 +1,92 @@
+{
+  "database_path": "D:\\Projects\\dualquery\\data\\byoe_audit.duckdb",
+  "audit_timestamp": "2026-11-05 11:17:07",
+  "total_transactions": 500,
+  "total_feedback_notes": 160,
+  "total_revenue_at_risk": 84272.65,
+  "total_freight_loss": 13690.48,
+  "total_financial_leakage": 97963.13,
+  "primary_leakage_driver": "Packaging & Transit Damage",
+  "clusters": [
+    {
+      "cluster_name": "Packaging & Transit Damage",
+      "incident_count": 37,
+      "impacted_orders": 36,
+      "impacted_parties": 33,
+      "gross_revenue_at_risk": 21429.04,
+      "total_freight_loss": 3128.96,
+      "avg_severity": 1.22,
+      "avg_delay_days": 10.1,
+      "top_category": "Furniture",
+      "top_region": "West_Coast",
+      "sample_evidence": [
+        "URGENT: Item was delivered broken in half. Package was dropped by courier.",
+        "Box was severely dented during transit, product chassis is bent and broken. Demanding a refund."
+      ]
+    },
+    {
+      "cluster_name": "Component & Out-of-Box Defects",
+      "incident_count": 41,
+      "impacted_orders": 41,
+      "impacted_parties": 38,
+      "gross_revenue_at_risk": 21112.66,
+      "total_freight_loss": 3289.88,
+      "avg_severity": 1.22,
+      "avg_delay_days": 7.2,
+      "top_category": "Industrial_Hardware",
+      "top_region": "East_Coast",
+      "sample_evidence": [
+        "Complaint: Motor seized after two hours of light duty. Requesting immediate replacement under warranty.",
+        "Complaint: Motor seized after two hours of light duty. Requesting immediate replacement under warranty."
+      ]
+    },
+    {
+      "cluster_name": "Missing Items & Accessories",
+      "incident_count": 31,
+      "impacted_orders": 31,
+      "impacted_parties": 29,
+      "gross_revenue_at_risk": 17311.13,
+      "total_freight_loss": 2489.17,
+      "avg_severity": 2.19,
+      "avg_delay_days": 7.5,
+      "top_category": "Cosmetics",
+      "top_region": "Metro_South",
+      "sample_evidence": [
+        "Hardware package arrived incomplete. Screws, bolts and mounting bracket were absent.",
+        "Quality Return: Hardware package arrived incomplete. Screws, bolts and mounting bracket were absent."
+      ]
+    },
+    {
+      "cluster_name": "Logistics Delays & Stalls",
+      "incident_count": 31,
+      "impacted_orders": 31,
+      "impacted_parties": 29,
+      "gross_revenue_at_risk": 12673.57,
+      "total_freight_loss": 2804.99,
+      "avg_severity": 2.0,
+      "avg_delay_days": 8.1,
+      "top_category": "Furniture",
+      "top_region": "Metro_North",
+      "sample_evidence": [
+        "Took over three weeks past estimated delivery date. Had to procure from local vendor at higher cost.",
+        "Complaint: Courier tracking showed no movement for 10 days without any notification."
+      ]
+    },
+    {
+      "cluster_name": "Specification & Variant Mismatches",
+      "incident_count": 20,
+      "impacted_orders": 20,
+      "impacted_parties": 19,
+      "gross_revenue_at_risk": 11746.25,
+      "total_freight_loss": 1977.48,
+      "avg_severity": 2.35,
+      "avg_delay_days": 6.5,
+      "top_category": "Furniture",
+      "top_region": "Central_Hub",
+      "sample_evidence": [
+        "URGENT: Ordered 220V European standard unit, but received 110V US model. Cannot use in our facility.",
+        "Shipped wrong color and wrong dimension. Ordered Black XL, received Grey Medium."
+      ]
+    }
+  ]
+}

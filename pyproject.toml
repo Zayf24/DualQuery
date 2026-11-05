@@ -1,0 +1,50 @@
+[project]
+name = "dualquery"
+version = "0.1.0"
+description = "Zero-Trust Hybrid Relational-Semantic Query Engine & MCP Server"
+readme = "README.md"
+authors = [
+    { name = "Zayf24", email = "shaikh.huzayfh@gmail.com" }
+]
+requires-python = ">=3.11,<3.13"
+dependencies = [
+    "torch>=2.2.0",
+    "duckdb>=1.1.0",
+    "pydantic>=2.7.0",
+    "sqlglot>=25.0.0",
+    "rich>=13.7.0",
+    "pandas>=2.2.0",
+    "pyarrow>=15.0.0",
+    "fastembed>=0.3.0",
+    "sentence-transformers>=3.0.0",
+    "einops>=0.8.2",
+    "rapidfuzz>=3.14.6",
+    "mcp>=2.3.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0.0",
+    "pytest-asyncio>=0.23.0",
+]
+
+[project.scripts]
+dualquery = "dualquery.cli:main"
+dualquery-mcp = "dualquery.mcp.server:main"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.uv]
+cache-dir = "D:/.cache/uv"
+
+[tool.uv.sources]
+torch = [
+  { index = "pytorch-cu124" },
+]
+
+[[tool.uv.index]]
+name = "pytorch-cu124"
+url = "https://download.pytorch.org/whl/cu124"
+explicit = true

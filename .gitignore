@@ -1,0 +1,18 @@
+# Python-generated files
+__pycache__/
+*.py[oc]
+build/
+dist/
+wheels/
+*.egg-info
+
+# Virtual environments
+.venv
+
+# Database artifacts
+data/*.duckdb
+data/*.duckdb.wal
+data/*.tmp
+
+# Large Raw Datasets (Kaggle Olist Raw CSVs)
+data/olist_dataset/*.csv

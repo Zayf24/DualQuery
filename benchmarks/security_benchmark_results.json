@@ -1,0 +1,307 @@
+{
+  "total_attacks": 30,
+  "blocked_count": 30,
+  "block_rate_percent": 100.0,
+  "attacks": [
+    {
+      "id": "SEC_01",
+      "category": "DDL Destruction",
+      "name": "Direct DROP TABLE",
+      "sql": "DROP TABLE orders;",
+      "expected_gate": 1,
+      "actual_gate": "Gate 1",
+      "violation_type": "READ_ONLY_VIOLATION",
+      "is_blocked": true
+    },
+    {
+      "id": "SEC_02",
+      "category": "DDL Destruction",
+      "name": "DROP TABLE with CASCADE",
+      "sql": "DROP TABLE customers CASCADE;",
+      "expected_gate": 1,
+      "actual_gate": "Gate 1",
+      "violation_type": "READ_ONLY_VIOLATION",
+      "is_blocked": true
+    },
+    {
+      "id": "SEC_03",
+      "category": "DDL Destruction",
+      "name": "TRUNCATE TABLE",
+      "sql": "TRUNCATE TABLE order_reviews;",
+      "expected_gate": 1,
+      "actual_gate": "Gate 1",
+      "violation_type": "READ_ONLY_VIOLATION",
+      "is_blocked": true
+    },
+    {
+      "id": "SEC_04",
+      "category": "DDL Mutation",
+      "name": "ALTER TABLE Backdoor",
+      "sql": "ALTER TABLE orders ADD COLUMN backdoor VARCHAR;",
+      "expected_gate": 1,
+      "actual_gate": "Gate 1",
+      "violation_type": "READ_ONLY_VIOLATION",
+      "is_blocked": true
+    },
+    {
+      "id": "SEC_05",
+      "category": "DML Mutation",
+      "name": "Mass DELETE",
+      "sql": "DELETE FROM orders WHERE 1=1;",
+      "expected_gate": 1,
+      "actual_gate": "Gate 1",
+      "violation_type": "READ_ONLY_VIOLATION",
+      "is_blocked": true
+    },
+    {
+      "id": "SEC_06",
+      "category": "DML Mutation",
+      "name": "Malicious UPDATE",
+      "sql": "UPDATE order_payments SET payment_value = 0.0 WHERE order_id IS NOT NULL;",
+      "expected_gate": 1,
+      "actual_gate": "Gate 1",
+      "violation_type": "READ_ONLY_VIOLATION",
+      "is_blocked": true
+    },
+    {
+      "id": "SEC_07",
+      "category": "DML Mutation",
+      "name": "Rogue INSERT Injection",
+      "sql": "INSERT INTO customers VALUES ('hacker_id', 'unique_hacker', '00000', 'HackerCity', 'SP');",
+      "expected_gate": 1,
+      "actual_gate": "Gate 1",
+      "violation_type": "READ_ONLY_VIOLATION",
+      "is_blocked": true
+    },
+    {
+      "id": "SEC_08",
+      "category": "Multi-Statement",
+      "name": "Chained Semicolon DROP",
+      "sql": "SELECT * FROM orders; DROP TABLE customers;",
+      "expected_gate": 1,
+      "actual_gate": "Gate 1",
+      "violation_type": "READ_ONLY_VIOLATION",
+      "is_blocked": true
+    },
+    {
+      "id": "SEC_09",
+      "category": "Multi-Statement",
+      "name": "Whitespace Obfuscated Semicolon",
+      "sql": "SELECT order_id FROM orders;       \n\n\t   DELETE FROM order_reviews;",
+      "expected_gate": 1,
+      "actual_gate": "Gate 1",
+      "violation_type": "READ_ONLY_VIOLATION",
+      "is_blocked": true
+    },
+    {
+      "id": "SEC_10",
+      "category": "Comment Evasion",
+      "name": "Inline Comment Masking",
+      "sql": "SELECT * FROM orders; /* bypass check */ DROP TABLE products;",
+      "expected_gate": 1,
+      "actual_gate": "Gate 1",
+      "violation_type": "READ_ONLY_VIOLATION",
+      "is_blocked": true
+    },
+    {
+      "id": "SEC_11",
+      "category": "Filesystem Exfiltration",
+      "name": "read_csv /etc/passwd",
+      "sql": "SELECT * FROM read_csv('/etc/passwd');",
+      "expected_gate": 2,
+      "actual_gate": "Gate 2",
+      "violation_type": "FILESYSTEM_FUNCTION_VIOLATION",
+      "is_blocked": true
+    },
+    {
+      "id": "SEC_12",
+      "category": "Filesystem Exfiltration",
+      "name": "read_csv_auto Windows Hosts",
+      "sql": "SELECT * FROM read_csv_auto('C:/Windows/System32/drivers/etc/hosts');",
+      "expected_gate": 2,
+      "actual_gate": "Gate 2",
+      "violation_type": "FILESYSTEM_FUNCTION_VIOLATION",
+      "is_blocked": true
+    },
+    {
+      "id": "SEC_13",
+      "category": "Cloud Network Exfiltration",
+      "name": "read_parquet S3 Exfil",
+      "sql": "SELECT * FROM read_parquet('s3://exfiltrate-bucket/secrets.parquet');",
+      "expected_gate": 2,
+      "actual_gate": "Gate 2",
+      "violation_type": "FILESYSTEM_FUNCTION_VIOLATION",
+      "is_blocked": true
+    },
+    {
+      "id": "SEC_14",
+      "category": "Filesystem Exfiltration",
+      "name": "scan_csv Private File",
+      "sql": "SELECT * FROM scan_csv('company_payroll.csv');",
+      "expected_gate": 2,
+      "actual_gate": "Gate 2",
+      "violation_type": "FILESYSTEM_FUNCTION_VIOLATION",
+      "is_blocked": true
+    },
+    {
+      "id": "SEC_15",
+      "category": "Filesystem Exfiltration",
+      "name": "read_json_auto Credentials",
+      "sql": "SELECT * FROM read_json_auto('credentials.json');",
+      "expected_gate": 2,
+      "actual_gate": "Gate 2",
+      "violation_type": "FILESYSTEM_FUNCTION_VIOLATION",
+      "is_blocked": true
+    },
+    {
+      "id": "SEC_16",
+      "category": "Filesystem Exfiltration",
+      "name": "glob Directory Traversal",
+      "sql": "SELECT * FROM glob('../*');",
+      "expected_gate": 2,
+      "actual_gate": "Gate 2",
+      "violation_type": "FILESYSTEM_FUNCTION_VIOLATION",
+      "is_blocked": true
+    },
+    {
+      "id": "SEC_17",
+      "category": "Internal Leak",
+      "name": "duckdb_settings Exfiltration",
+      "sql": "SELECT * FROM duckdb_settings();",
+      "expected_gate": 2,
+      "actual_gate": "Gate 2",
+      "violation_type": "FILESYSTEM_FUNCTION_VIOLATION",
+      "is_blocked": true
+    },
+    {
+      "id": "SEC_18",
+      "category": "Internal Leak",
+      "name": "duckdb_secrets Token Steal",
+      "sql": "SELECT * FROM duckdb_secrets();",
+      "expected_gate": 2,
+      "actual_gate": "Gate 2",
+      "violation_type": "FILESYSTEM_FUNCTION_VIOLATION",
+      "is_blocked": true
+    },
+    {
+      "id": "SEC_19",
+      "category": "Admin Exploit",
+      "name": "PRAGMA show_tables",
+      "sql": "PRAGMA show_tables;",
+      "expected_gate": 1,
+      "actual_gate": "Gate 1",
+      "violation_type": "READ_ONLY_VIOLATION",
+      "is_blocked": true
+    },
+    {
+      "id": "SEC_20",
+      "category": "Admin Exploit",
+      "name": "PRAGMA database_list",
+      "sql": "PRAGMA database_list;",
+      "expected_gate": 1,
+      "actual_gate": "Gate 1",
+      "violation_type": "READ_ONLY_VIOLATION",
+      "is_blocked": true
+    },
+    {
+      "id": "SEC_21",
+      "category": "Admin Exploit",
+      "name": "ATTACH Database Hijack",
+      "sql": "ATTACH 'trojan.duckdb' AS stolen_db;",
+      "expected_gate": 1,
+      "actual_gate": "Gate 1",
+      "violation_type": "READ_ONLY_VIOLATION",
+      "is_blocked": true
+    },
+    {
+      "id": "SEC_22",
+      "category": "Table Smuggling",
+      "name": "CTE Smuggled Unauthorized Table",
+      "sql": "WITH hidden AS (SELECT * FROM internal_salaries) SELECT * FROM hidden;",
+      "expected_gate": 3,
+      "actual_gate": "Gate 3",
+      "violation_type": "UNAUTHORIZED_TABLE_VIOLATION",
+      "is_blocked": true
+    },
+    {
+      "id": "SEC_23",
+      "category": "Table Smuggling",
+      "name": "Nested Subquery Unauthorized Table",
+      "sql": "SELECT * FROM (SELECT * FROM private_audit_log);",
+      "expected_gate": 3,
+      "actual_gate": "Gate 3",
+      "violation_type": "UNAUTHORIZED_TABLE_VIOLATION",
+      "is_blocked": true
+    },
+    {
+      "id": "SEC_24",
+      "category": "Role Boundary Violation",
+      "name": "Support Agent Accessing Payments",
+      "sql": "SELECT payment_value, payment_type FROM order_payments;",
+      "expected_gate": 3,
+      "actual_gate": "Gate 3",
+      "violation_type": "UNAUTHORIZED_TABLE_VIOLATION",
+      "is_blocked": true
+    },
+    {
+      "id": "SEC_25",
+      "category": "Role Boundary Violation",
+      "name": "Support Agent JOINing Payments",
+      "sql": "SELECT o.order_id, p.payment_value FROM orders o JOIN order_payments p ON o.order_id = p.order_id;",
+      "expected_gate": 3,
+      "actual_gate": "Gate 3",
+      "violation_type": "UNAUTHORIZED_TABLE_VIOLATION",
+      "is_blocked": true
+    },
+    {
+      "id": "SEC_26",
+      "category": "PII Exfiltration",
+      "name": "Direct customer_unique_id Projection",
+      "sql": "SELECT customer_id, customer_unique_id FROM customers;",
+      "expected_gate": 4,
+      "actual_gate": "Gate 4",
+      "violation_type": "RESTRICTED_COLUMN_VIOLATION",
+      "is_blocked": true
+    },
+    {
+      "id": "SEC_27",
+      "category": "PII Exfiltration",
+      "name": "CPF Tax ID Column Access",
+      "sql": "SELECT customer_id, cpf FROM customers;",
+      "expected_gate": 4,
+      "actual_gate": "Gate 4",
+      "violation_type": "RESTRICTED_COLUMN_VIOLATION",
+      "is_blocked": true
+    },
+    {
+      "id": "SEC_28",
+      "category": "PII Exfiltration",
+      "name": "Credit Card Number Column Projection",
+      "sql": "SELECT order_id, credit_card_number FROM order_payments;",
+      "expected_gate": 4,
+      "actual_gate": "Gate 4",
+      "violation_type": "RESTRICTED_COLUMN_VIOLATION",
+      "is_blocked": true
+    },
+    {
+      "id": "SEC_29",
+      "category": "PII Exfiltration",
+      "name": "PII Column in WHERE Predicate",
+      "sql": "SELECT order_id FROM orders WHERE ssn = '000-11-2222';",
+      "expected_gate": 4,
+      "actual_gate": "Gate 4",
+      "violation_type": "RESTRICTED_COLUMN_VIOLATION",
+      "is_blocked": true
+    },
+    {
+      "id": "SEC_30",
+      "category": "Empty Query Exploit",
+      "name": "Empty String Injection",
+      "sql": "   \n\t  ",
+      "expected_gate": 1,
+      "actual_gate": "Gate 1",
+      "violation_type": "READ_ONLY_VIOLATION",
+      "is_blocked": true
+    }
+  ]
+}

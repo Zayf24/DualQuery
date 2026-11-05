@@ -1,0 +1,161 @@
+complaint_id,invoice_no,severity_rating,customer_remarks,complaint_date
+NOTE-0001,INV-2025-00166,2,Complaint: Catalog model number does not match what was delivered. Seller sent obsolete variant.,2025-07-08 00:00:00
+NOTE-0002,INV-2025-00155,2,"URGENT: Ordered 220V European standard unit, but received 110V US model. Cannot use in our facility.",2025-03-12 00:00:00
+NOTE-0003,INV-2025-00191,1,Complaint: Motor seized after two hours of light duty. Requesting immediate replacement under warranty.,2025-02-23 00:00:00
+NOTE-0004,INV-2025-00230,2,Defect Report: Corner of the furniture arrived chipped and scratched due to insufficient bubble wrap.,2025-03-02 00:00:00
+NOTE-0005,INV-2025-00416,3,"Complaint: Shipped wrong color and wrong dimension. Ordered Black XL, received Grey Medium.",2025-07-08 00:00:00
+NOTE-0006,INV-2025-00329,1,URGENT: Took over three weeks past estimated delivery date. Had to procure from local vendor at higher cost.,2025-04-22 00:00:00
+NOTE-0007,INV-2025-00092,1,"Box was severely dented during transit, product chassis is bent and broken. Demanding a refund.",2025-02-06 00:00:00
+NOTE-0008,INV-2025-00007,3,"Defect Report: Shipped wrong color and wrong dimension. Ordered Black XL, received Grey Medium.",2025-06-23 00:00:00
+NOTE-0009,INV-2025-00261,2,Hydraulic pump overheats within 10 minutes of operation. Suspect counterfeit or factory second.,2025-02-09 00:00:00
+NOTE-0010,INV-2025-00403,2,URGENT: Catalog model number does not match what was delivered. Seller sent obsolete variant.,2025-05-21 00:00:00
+NOTE-0011,INV-2025-00065,1,"Box was severely dented during transit, product chassis is bent and broken. Demanding a refund.",2025-04-26 00:00:00
+NOTE-0012,INV-2025-00031,2,Defect Report: Hydraulic pump overheats within 10 minutes of operation. Suspect counterfeit or factory second.,2025-05-16 00:00:00
+NOTE-0013,INV-2025-00345,2,The power brick and charging cable were missing from the box.,2025-02-19 00:00:00
+NOTE-0014,INV-2025-00374,1,URGENT: Item was delivered broken in half. Package was dropped by courier.,2025-04-15 00:00:00
+NOTE-0015,INV-2025-00068,1,Motor seized after two hours of light duty. Requesting immediate replacement under warranty.,2025-03-29 00:00:00
+NOTE-0016,INV-2025-00380,1,Defect Report: Defective out of the box. Power supply trips the circuit breaker immediately upon plugging in.,2025-04-23 00:00:00
+NOTE-0017,INV-2025-00180,1,Complaint: Motor seized after two hours of light duty. Requesting immediate replacement under warranty.,2025-03-17 00:00:00
+NOTE-0018,INV-2025-00083,3,Quality Return: Courier tracking showed no movement for 10 days without any notification.,2025-03-22 00:00:00
+NOTE-0019,INV-2025-00302,3,"Complaint: Shipped wrong color and wrong dimension. Ordered Black XL, received Grey Medium.",2025-02-10 00:00:00
+NOTE-0020,INV-2025-00386,2,"Ordered 220V European standard unit, but received 110V US model. Cannot use in our facility.",2025-07-04 00:00:00
+NOTE-0021,INV-2025-00099,1,Quality Return: Defective out of the box. Power supply trips the circuit breaker immediately upon plugging in.,2025-07-04 00:00:00
+NOTE-0022,INV-2025-00228,1,Quality Return: Material quality is sub-par. Textile seams came apart on the first day of inspection.,2025-07-07 00:00:00
+NOTE-0023,INV-2025-00310,1,Complaint: Material quality is sub-par. Textile seams came apart on the first day of inspection.,2025-02-26 00:00:00
+NOTE-0024,INV-2025-00231,2,"Hardware package arrived incomplete. Screws, bolts and mounting bracket were absent.",2025-07-07 00:00:00
+NOTE-0025,INV-2025-00487,2,Quality Return: Shipment arrived 14 days past the committed deadline. Our factory assembly line was stalled.,2025-06-27 00:00:00
+NOTE-0026,INV-2025-00488,1,Complaint: Item was delivered broken in half. Package was dropped by courier.,2025-05-14 00:00:00
+NOTE-0027,INV-2025-00432,1,Quality Return: Material quality is sub-par. Textile seams came apart on the first day of inspection.,2025-07-06 00:00:00
+NOTE-0028,INV-2025-00443,2,Quality Return: Corner of the furniture arrived chipped and scratched due to insufficient bubble wrap.,2025-05-29 00:00:00
+NOTE-0029,INV-2025-00098,2,Catalog model number does not match what was delivered. Seller sent obsolete variant.,2025-06-01 00:00:00
+NOTE-0030,INV-2025-00341,2,"Ordered 220V European standard unit, but received 110V US model. Cannot use in our facility.",2025-03-20 00:00:00
+NOTE-0031,INV-2025-00211,2,"URGENT: Ordered 220V European standard unit, but received 110V US model. Cannot use in our facility.",2025-05-19 00:00:00
+NOTE-0032,INV-2025-00195,2,URGENT: Corner of the furniture arrived chipped and scratched due to insufficient bubble wrap.,2025-04-13 00:00:00
+NOTE-0033,INV-2025-00246,1,URGENT: Item was delivered broken in half. Package was dropped by courier.,2025-06-26 00:00:00
+NOTE-0034,INV-2025-00358,1,"Complaint: Box was severely dented during transit, product chassis is bent and broken. Demanding a refund.",2025-03-15 00:00:00
+NOTE-0035,INV-2025-00280,2,Quality Return: The power brick and charging cable were missing from the box.,2025-06-29 00:00:00
+NOTE-0036,INV-2025-00237,3,"Complaint: Remote control was missing from the package, cannot operate unit.",2025-01-21 00:00:00
+NOTE-0037,INV-2025-00409,2,Complaint: Shipment arrived 14 days past the committed deadline. Our factory assembly line was stalled.,2025-05-24 00:00:00
+NOTE-0038,INV-2025-00246,1,"Quality Return: Box was severely dented during transit, product chassis is bent and broken. Demanding a refund.",2025-05-01 00:00:00
+NOTE-0039,INV-2025-00205,2,Corner of the furniture arrived chipped and scratched due to insufficient bubble wrap.,2025-06-27 00:00:00
+NOTE-0040,INV-2025-00168,1,Complaint: Material quality is sub-par. Textile seams came apart on the first day of inspection.,2025-06-20 00:00:00
+NOTE-0041,INV-2025-00126,1,Defect Report: Material quality is sub-par. Textile seams came apart on the first day of inspection.,2025-03-07 00:00:00
+NOTE-0042,INV-2025-00403,1,Quality Return: Defective out of the box. Power supply trips the circuit breaker immediately upon plugging in.,2025-07-02 00:00:00
+NOTE-0043,INV-2025-00406,1,"Defect Report: Box was severely dented during transit, product chassis is bent and broken. Demanding a refund.",2025-04-15 00:00:00
+NOTE-0044,INV-2025-00223,2,"Quality Return: Ordered 220V European standard unit, but received 110V US model. Cannot use in our facility.",2025-05-27 00:00:00
+NOTE-0045,INV-2025-00173,1,"URGENT: Box was severely dented during transit, product chassis is bent and broken. Demanding a refund.",2025-03-11 00:00:00
+NOTE-0046,INV-2025-00378,2,"Hardware package arrived incomplete. Screws, bolts and mounting bracket were absent.",2025-04-29 00:00:00
+NOTE-0047,INV-2025-00352,2,Quality Return: Only received 2 units out of the 4 invoiced on the delivery challan.,2025-06-05 00:00:00
+NOTE-0048,INV-2025-00335,1,Material quality is sub-par. Textile seams came apart on the first day of inspection.,2025-02-25 00:00:00
+NOTE-0049,INV-2025-00439,2,"Quality Return: Hardware package arrived incomplete. Screws, bolts and mounting bracket were absent.",2025-04-30 00:00:00
+NOTE-0050,INV-2025-00377,2,URGENT: The power brick and charging cable were missing from the box.,2025-02-22 00:00:00
+NOTE-0051,INV-2025-00225,2,The power brick and charging cable were missing from the box.,2025-02-05 00:00:00
+NOTE-0052,INV-2025-00085,3,URGENT: Courier tracking showed no movement for 10 days without any notification.,2025-04-25 00:00:00
+NOTE-0053,INV-2025-00356,3,"Remote control was missing from the package, cannot operate unit.",2025-03-14 00:00:00
+NOTE-0054,INV-2025-00179,1,Complaint: Item was delivered broken in half. Package was dropped by courier.,2025-06-04 00:00:00
+NOTE-0055,INV-2025-00241,3,"URGENT: Remote control was missing from the package, cannot operate unit.",2025-03-31 00:00:00
+NOTE-0056,INV-2025-00147,3,"Complaint: Shipped wrong color and wrong dimension. Ordered Black XL, received Grey Medium.",2025-01-16 00:00:00
+NOTE-0057,INV-2025-00270,1,Quality Return: Item was delivered broken in half. Package was dropped by courier.,2025-06-07 00:00:00
+NOTE-0058,INV-2025-00215,1,"Box was severely dented during transit, product chassis is bent and broken. Demanding a refund.",2025-06-24 00:00:00
+NOTE-0059,INV-2025-00061,2,Defect Report: Shipment arrived 14 days past the committed deadline. Our factory assembly line was stalled.,2025-06-01 00:00:00
+NOTE-0060,INV-2025-00297,1,Quality Return: Material quality is sub-par. Textile seams came apart on the first day of inspection.,2025-01-24 00:00:00
+NOTE-0061,INV-2025-00030,1,Took over three weeks past estimated delivery date. Had to procure from local vendor at higher cost.,2025-03-03 00:00:00
+NOTE-0062,INV-2025-00136,2,The power brick and charging cable were missing from the box.,2025-01-23 00:00:00
+NOTE-0063,INV-2025-00027,1,Complaint: Defective out of the box. Power supply trips the circuit breaker immediately upon plugging in.,2025-04-22 00:00:00
+NOTE-0064,INV-2025-00391,1,Material quality is sub-par. Textile seams came apart on the first day of inspection.,2025-04-19 00:00:00
+NOTE-0065,INV-2025-00212,1,"Quality Return: Liquid leaked all over the packaging, ruined the other goods in the box.",2025-03-03 00:00:00
+NOTE-0066,INV-2025-00385,2,"Quality Return: Hardware package arrived incomplete. Screws, bolts and mounting bracket were absent.",2025-03-31 00:00:00
+NOTE-0067,INV-2025-00035,2,Quality Return: Delayed delivery caused us to miss our seasonal promotional window.,2025-03-02 00:00:00
+NOTE-0068,INV-2025-00431,1,Motor seized after two hours of light duty. Requesting immediate replacement under warranty.,2025-05-07 00:00:00
+NOTE-0069,INV-2025-00230,1,URGENT: Material quality is sub-par. Textile seams came apart on the first day of inspection.,2025-02-04 00:00:00
+NOTE-0070,INV-2025-00353,2,Defect Report: Delayed delivery caused us to miss our seasonal promotional window.,2025-03-08 00:00:00
+NOTE-0071,INV-2025-00265,1,Motor seized after two hours of light duty. Requesting immediate replacement under warranty.,2025-03-09 00:00:00
+NOTE-0072,INV-2025-00433,1,"Quality Return: Box was severely dented during transit, product chassis is bent and broken. Demanding a refund.",2025-04-13 00:00:00
+NOTE-0073,INV-2025-00014,2,Defect Report: Corner of the furniture arrived chipped and scratched due to insufficient bubble wrap.,2025-03-12 00:00:00
+NOTE-0074,INV-2025-00121,1,Quality Return: Material quality is sub-par. Textile seams came apart on the first day of inspection.,2025-01-12 00:00:00
+NOTE-0075,INV-2025-00367,1,Quality Return: Defective out of the box. Power supply trips the circuit breaker immediately upon plugging in.,2025-05-17 00:00:00
+NOTE-0076,INV-2025-00085,1,Defect Report: Defective out of the box. Power supply trips the circuit breaker immediately upon plugging in.,2025-05-10 00:00:00
+NOTE-0077,INV-2025-00440,1,"Quality Return: Box was severely dented during transit, product chassis is bent and broken. Demanding a refund.",2025-06-21 00:00:00
+NOTE-0078,INV-2025-00165,2,"Quality Return: Hardware package arrived incomplete. Screws, bolts and mounting bracket were absent.",2025-05-17 00:00:00
+NOTE-0079,INV-2025-00355,1,"URGENT: Liquid leaked all over the packaging, ruined the other goods in the box.",2025-02-17 00:00:00
+NOTE-0080,INV-2025-00093,1,Material quality is sub-par. Textile seams came apart on the first day of inspection.,2025-01-07 00:00:00
+NOTE-0081,INV-2025-00314,1,"Complaint: Liquid leaked all over the packaging, ruined the other goods in the box.",2025-06-26 00:00:00
+NOTE-0082,INV-2025-00131,2,"Defect Report: Hardware package arrived incomplete. Screws, bolts and mounting bracket were absent.",2025-02-01 00:00:00
+NOTE-0083,INV-2025-00201,2,"Hardware package arrived incomplete. Screws, bolts and mounting bracket were absent.",2025-07-04 00:00:00
+NOTE-0084,INV-2025-00240,2,"URGENT: Ordered 220V European standard unit, but received 110V US model. Cannot use in our facility.",2025-06-30 00:00:00
+NOTE-0085,INV-2025-00232,1,URGENT: Item was delivered broken in half. Package was dropped by courier.,2025-05-03 00:00:00
+NOTE-0086,INV-2025-00317,1,URGENT: Took over three weeks past estimated delivery date. Had to procure from local vendor at higher cost.,2025-01-28 00:00:00
+NOTE-0087,INV-2025-00495,1,"URGENT: Liquid leaked all over the packaging, ruined the other goods in the box.",2025-02-20 00:00:00
+NOTE-0088,INV-2025-00306,3,"Remote control was missing from the package, cannot operate unit.",2025-01-24 00:00:00
+NOTE-0089,INV-2025-00500,2,Complaint: Hydraulic pump overheats within 10 minutes of operation. Suspect counterfeit or factory second.,2025-03-13 00:00:00
+NOTE-0090,INV-2025-00229,2,"Defect Report: Ordered 220V European standard unit, but received 110V US model. Cannot use in our facility.",2025-05-01 00:00:00
+NOTE-0091,INV-2025-00004,3,Defect Report: Courier tracking showed no movement for 10 days without any notification.,2025-03-27 00:00:00
+NOTE-0092,INV-2025-00073,1,Defect Report: The cardboard carton arrived crushed and the interior display was shattered. Completely unusable.,2025-06-27 00:00:00
+NOTE-0093,INV-2025-00138,2,Corner of the furniture arrived chipped and scratched due to insufficient bubble wrap.,2025-01-07 00:00:00
+NOTE-0094,INV-2025-00437,1,URGENT: Motor seized after two hours of light duty. Requesting immediate replacement under warranty.,2025-06-04 00:00:00
+NOTE-0095,INV-2025-00017,1,"URGENT: Box was severely dented during transit, product chassis is bent and broken. Demanding a refund.",2025-04-07 00:00:00
+NOTE-0096,INV-2025-00364,1,URGENT: Defective out of the box. Power supply trips the circuit breaker immediately upon plugging in.,2025-03-21 00:00:00
+NOTE-0097,INV-2025-00183,2,Shipment arrived 14 days past the committed deadline. Our factory assembly line was stalled.,2025-01-28 00:00:00
+NOTE-0098,INV-2025-00347,2,Defect Report: Shipment arrived 14 days past the committed deadline. Our factory assembly line was stalled.,2025-04-13 00:00:00
+NOTE-0099,INV-2025-00025,3,URGENT: Courier tracking showed no movement for 10 days without any notification.,2025-05-07 00:00:00
+NOTE-0100,INV-2025-00107,2,The power brick and charging cable were missing from the box.,2025-03-03 00:00:00
+NOTE-0101,INV-2025-00452,1,Defect Report: Item was delivered broken in half. Package was dropped by courier.,2025-05-25 00:00:00
+NOTE-0102,INV-2025-00032,2,Complaint: Shipment arrived 14 days past the committed deadline. Our factory assembly line was stalled.,2025-03-23 00:00:00
+NOTE-0103,INV-2025-00148,2,URGENT: Delayed delivery caused us to miss our seasonal promotional window.,2025-05-27 00:00:00
+NOTE-0104,INV-2025-00224,1,Complaint: Material quality is sub-par. Textile seams came apart on the first day of inspection.,2025-02-06 00:00:00
+NOTE-0105,INV-2025-00425,1,"URGENT: Box was severely dented during transit, product chassis is bent and broken. Demanding a refund.",2025-06-01 00:00:00
+NOTE-0106,INV-2025-00243,1,Defect Report: Motor seized after two hours of light duty. Requesting immediate replacement under warranty.,2025-05-23 00:00:00
+NOTE-0107,INV-2025-00483,1,URGENT: Material quality is sub-par. Textile seams came apart on the first day of inspection.,2025-03-25 00:00:00
+NOTE-0108,INV-2025-00195,2,"Quality Return: Hardware package arrived incomplete. Screws, bolts and mounting bracket were absent.",2025-03-01 00:00:00
+NOTE-0109,INV-2025-00084,2,"Ordered 220V European standard unit, but received 110V US model. Cannot use in our facility.",2025-02-11 00:00:00
+NOTE-0110,INV-2025-00128,2,Complaint: The power brick and charging cable were missing from the box.,2025-03-03 00:00:00
+NOTE-0111,INV-2025-00293,1,Quality Return: Motor seized after two hours of light duty. Requesting immediate replacement under warranty.,2025-02-24 00:00:00
+NOTE-0112,INV-2025-00096,2,Complaint: Corner of the furniture arrived chipped and scratched due to insufficient bubble wrap.,2025-06-26 00:00:00
+NOTE-0113,INV-2025-00441,2,URGENT: Hydraulic pump overheats within 10 minutes of operation. Suspect counterfeit or factory second.,2025-05-26 00:00:00
+NOTE-0114,INV-2025-00312,3,"Shipped wrong color and wrong dimension. Ordered Black XL, received Grey Medium.",2025-01-24 00:00:00
+NOTE-0115,INV-2025-00219,2,URGENT: Shipment arrived 14 days past the committed deadline. Our factory assembly line was stalled.,2025-03-11 00:00:00
+NOTE-0116,INV-2025-00128,2,Complaint: Corner of the furniture arrived chipped and scratched due to insufficient bubble wrap.,2025-07-10 00:00:00
+NOTE-0117,INV-2025-00343,2,Defect Report: Hydraulic pump overheats within 10 minutes of operation. Suspect counterfeit or factory second.,2025-03-31 00:00:00
+NOTE-0118,INV-2025-00303,2,Complaint: Delayed delivery caused us to miss our seasonal promotional window.,2025-06-26 00:00:00
+NOTE-0119,INV-2025-00428,2,URGENT: Only received 2 units out of the 4 invoiced on the delivery challan.,2025-03-19 00:00:00
+NOTE-0120,INV-2025-00024,1,URGENT: Motor seized after two hours of light duty. Requesting immediate replacement under warranty.,2025-02-24 00:00:00
+NOTE-0121,INV-2025-00034,1,Defect Report: Took over three weeks past estimated delivery date. Had to procure from local vendor at higher cost.,2025-05-01 00:00:00
+NOTE-0122,INV-2025-00401,1,Took over three weeks past estimated delivery date. Had to procure from local vendor at higher cost.,2025-06-23 00:00:00
+NOTE-0123,INV-2025-00196,2,Shipment arrived 14 days past the committed deadline. Our factory assembly line was stalled.,2025-02-14 00:00:00
+NOTE-0124,INV-2025-00466,2,Hydraulic pump overheats within 10 minutes of operation. Suspect counterfeit or factory second.,2025-04-09 00:00:00
+NOTE-0125,INV-2025-00245,1,Defect Report: Took over three weeks past estimated delivery date. Had to procure from local vendor at higher cost.,2025-02-18 00:00:00
+NOTE-0126,INV-2025-00149,1,Quality Return: The cardboard carton arrived crushed and the interior display was shattered. Completely unusable.,2025-03-10 00:00:00
+NOTE-0127,INV-2025-00028,2,Defect Report: Only received 2 units out of the 4 invoiced on the delivery challan.,2025-03-17 00:00:00
+NOTE-0128,INV-2025-00271,2,Complaint: Delayed delivery caused us to miss our seasonal promotional window.,2025-06-28 00:00:00
+NOTE-0129,INV-2025-00075,1,Defect Report: Took over three weeks past estimated delivery date. Had to procure from local vendor at higher cost.,2025-05-04 00:00:00
+NOTE-0130,INV-2025-00326,3,"Quality Return: Shipped wrong color and wrong dimension. Ordered Black XL, received Grey Medium.",2025-03-25 00:00:00
+NOTE-0131,INV-2025-00198,2,Catalog model number does not match what was delivered. Seller sent obsolete variant.,2025-02-02 00:00:00
+NOTE-0132,INV-2025-00162,2,The power brick and charging cable were missing from the box.,2025-01-26 00:00:00
+NOTE-0133,INV-2025-00332,3,"Complaint: Remote control was missing from the package, cannot operate unit.",2025-05-23 00:00:00
+NOTE-0134,INV-2025-00258,2,"Quality Return: Hardware package arrived incomplete. Screws, bolts and mounting bracket were absent.",2025-06-15 00:00:00
+NOTE-0135,INV-2025-00220,1,"URGENT: Liquid leaked all over the packaging, ruined the other goods in the box.",2025-01-10 00:00:00
+NOTE-0136,INV-2025-00021,1,URGENT: Defective out of the box. Power supply trips the circuit breaker immediately upon plugging in.,2025-06-03 00:00:00
+NOTE-0137,INV-2025-00322,2,Defect Report: Hydraulic pump overheats within 10 minutes of operation. Suspect counterfeit or factory second.,2025-06-06 00:00:00
+NOTE-0138,INV-2025-00081,2,"URGENT: Hardware package arrived incomplete. Screws, bolts and mounting bracket were absent.",2025-05-27 00:00:00
+NOTE-0139,INV-2025-00146,3,"Remote control was missing from the package, cannot operate unit.",2025-05-24 00:00:00
+NOTE-0140,INV-2025-00157,2,Complaint: Catalog model number does not match what was delivered. Seller sent obsolete variant.,2025-04-09 00:00:00
+NOTE-0141,INV-2025-00336,3,Complaint: Courier tracking showed no movement for 10 days without any notification.,2025-06-05 00:00:00
+NOTE-0142,INV-2025-00462,2,Complaint: Shipment arrived 14 days past the committed deadline. Our factory assembly line was stalled.,2025-05-04 00:00:00
+NOTE-0143,INV-2025-00184,1,Defective out of the box. Power supply trips the circuit breaker immediately upon plugging in.,2025-01-29 00:00:00
+NOTE-0144,INV-2025-00118,3,Quality Return: Courier tracking showed no movement for 10 days without any notification.,2025-05-14 00:00:00
+NOTE-0145,INV-2025-00475,1,Complaint: The cardboard carton arrived crushed and the interior display was shattered. Completely unusable.,2025-06-12 00:00:00
+NOTE-0146,INV-2025-00076,2,The power brick and charging cable were missing from the box.,2025-02-10 00:00:00
+NOTE-0147,INV-2025-00328,3,"Complaint: Shipped wrong color and wrong dimension. Ordered Black XL, received Grey Medium.",2025-02-20 00:00:00
+NOTE-0148,INV-2025-00477,2,Hydraulic pump overheats within 10 minutes of operation. Suspect counterfeit or factory second.,2025-06-23 00:00:00
+NOTE-0149,INV-2025-00399,1,Defect Report: Item was delivered broken in half. Package was dropped by courier.,2025-04-07 00:00:00
+NOTE-0150,INV-2025-00042,1,"Complaint: Box was severely dented during transit, product chassis is bent and broken. Demanding a refund.",2025-05-10 00:00:00
+NOTE-0151,INV-2025-00311,2,URGENT: Only received 2 units out of the 4 invoiced on the delivery challan.,2025-03-14 00:00:00
+NOTE-0152,INV-2025-00179,2,Complaint: Delayed delivery caused us to miss our seasonal promotional window.,2025-01-16 00:00:00
+NOTE-0153,INV-2025-00134,2,"Hardware package arrived incomplete. Screws, bolts and mounting bracket were absent.",2025-04-08 00:00:00
+NOTE-0154,INV-2025-00421,3,Defect Report: Courier tracking showed no movement for 10 days without any notification.,2025-05-02 00:00:00
+NOTE-0155,INV-2025-00124,1,"URGENT: Box was severely dented during transit, product chassis is bent and broken. Demanding a refund.",2025-06-21 00:00:00
+NOTE-0156,INV-2025-00294,1,URGENT: Took over three weeks past estimated delivery date. Had to procure from local vendor at higher cost.,2025-07-05 00:00:00
+NOTE-0157,INV-2025-00077,1,Quality Return: Defective out of the box. Power supply trips the circuit breaker immediately upon plugging in.,2025-03-14 00:00:00
+NOTE-0158,INV-2025-00388,2,Hydraulic pump overheats within 10 minutes of operation. Suspect counterfeit or factory second.,2025-05-31 00:00:00
+NOTE-0159,INV-2025-00362,2,Defect Report: The power brick and charging cable were missing from the box.,2025-06-22 00:00:00
+NOTE-0160,INV-2025-00194,3,Quality Return: Courier tracking showed no movement for 10 days without any notification.,2025-06-05 00:00:00

@@ -39,11 +39,7 @@ To operate as a real-world production tool with verifiable adoption and commerci
 
 ---
 
-### 3. Verified Performance & Resume Positioning
+### 3. Verified Benchmark Summary
 
-* **Separated Latency Reporting (Zero Benchmark Inflation):**
-  * **Local Hybrid Engine Execution Latency (DuckDB SQL + HNSW/SIMD + BM25 RRF):** `11ms – 38ms` (P95 `< 40ms`).
-  * **End-to-End Agentic Turn Latency (including LLM Decomposition + Synthesis):** `950ms – 1,450ms` (vs. `25,000ms+` for long-context table stuffing).
-
-* **Verified Resume Bullet:**
-  > *"Architected `DualQuery` (`dualquery-mcp`), an open-source Zero-Trust Hybrid Relational-Semantic Query Engine and MCP server in Python and DuckDB. Engineered a cardinality-aware physical query optimizer that dynamically switches between exact SIMD vector scans on SQL-filtered subsets (100% recall) and HNSW + BM25 Reciprocal Rank Fusion (<38ms P95 engine execution), backed by a `SQLGlot` AST security rewriter and local PII tokenizer."*
+* **Optimizer Plan Accuracy (`benchmarks/evaluate_optimizer.py`):** **100.0%** plan match across 50 golden hybrid queries (`Plan A` P50: `315ms`, P95: `409ms`; `Plan B` P50: `1,003ms`, P95: `1,073ms` including local query embedding + OLAP aggregation).
+* **Security Gate Block Rate (`benchmarks/evaluate_security.py`):** **100.0%** (`30/30` adversarial SQL injection, schema-escape, and unauthorized column-qualifier attacks blocked across Gates 1–5).

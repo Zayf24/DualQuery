@@ -42,7 +42,7 @@ flowchart TD
         
         ASTGuard --> Probe["Pre-Flight Cardinality Probe<br/>(Executes <2ms COUNT(*) on SQL Predicates)"]
         
-        Probe --> Decision{"Filtered Rows N_cand <= 1,500?"}
+        Probe --> Decision{"Filtered Rows N_cand <= 5,000?"}
         
         Decision -- "Yes: High Selectivity (Plan A)" --> PlanA["Plan A: Relational Pushdown + Exact SIMD Scan<br/>1. Filter SQL rows in DuckDB<br/>2. Exact array_cosine_distance() + BM25 on N_cand<br/>(100% Vector Recall, Zero HNSW Island Loss)"]
         
@@ -77,31 +77,46 @@ flowchart TD
 # 1. Install dependencies with UV
 uv sync --extra dev
 
-# 2. Run Commercial BYOE Financial Audit on sample ERP data
+# 2. Run Commercial BYOE Financial Audit on bundled sample ERP CSV data (Zero external DB setup required)
 uv run dualquery audit \
   --transactions data/commercial_case_study/transactions.csv \
   --feedback data/commercial_case_study/returns_notes.csv \
   --output-json data/commercial_case_study/audit_summary.json
 
-# 3. Start Zero-Trust MCP Server (JSON-RPC 2.0 over stdio)
+# 3. Start Zero-Trust MCP Server (stdio for Claude Desktop / Cursor, or Streamable HTTP / SSE for remote services)
 uv run dualquery serve
-# or directly:
-uv run dualquery-mcp
+uv run dualquery serve --transport streamable-http --host 127.0.0.1 --port 8000
+uv run dualquery serve --transport sse --port 8000
 
-# 4. Run Automated Test Suite
-uv run --extra dev pytest
+# 4. Run Automated Test Suite (33 unit, MCP, and adversarial security tests)
+uv run --extra dev pytest -v
+```
+
+### MCP Client Integration (`claude_desktop_config.json` / `.cursor/mcp.json`)
+
+```json
+{
+  "mcpServers": {
+    "dualquery": {
+      "command": "uv",
+      "args": ["--directory", "/path/to/dualquery", "run", "dualquery-mcp"]
+    }
+  }
+}
 ```
 
 ---
 
 ## 📊 Verified Telemetry & Benchmarks
 
+All figures below are directly backed by committed harnesses in [`benchmarks/`](benchmarks/) and [`tests/`](tests/):
+
 | Metric | DualQuery Local Engine | Standard 1M-Context Stuffing |
 | :--- | :--- | :--- |
-| **Engine Execution Latency** | **11ms – 38ms (P95 < 40ms)** | N/A |
-| **End-to-End Turn Latency** | **~1.1 seconds** (LLM decomposition + engine + synthesis) | **25.0 – 40.0 seconds** |
+| **Plan A Latency (High Selectivity ≤ 5,000 rows)** | **315ms P50 / 409ms P95** *(incl. local embedding)* | **25.0 – 40.0 seconds** |
+| **Plan B Latency (Broad Scan > 5,000 rows)** | **1,003ms P50 / 1,073ms P95** *(HNSW + BM25 RRF)* | **25.0 – 40.0 seconds** |
 | **Arithmetic Accuracy** | **100.0% Deterministic** (DuckDB SQL OLAP) | 68% – 82% (Frequent hallucinated sums) |
-| **Cost per 100k-Row Query** | **$0.00** database compute | **$1.50 – $3.00** per query |
+| **Cost per 100k-Row Query** | **$0.00** local compute | **$1.50 – $3.00** per query |
 | **Data Privacy** | **Zero-Egress** (Local execution + PII scrubbing) | Full database row streaming to cloud APIs |
 | **Optimizer Decision Accuracy** | **100.0%** across 50 Golden Hybrid Queries | N/A |
 | **Security Attack Block Rate** | **100.0%** (30/30 red-team injection vectors blocked) | N/A |
@@ -110,21 +125,20 @@ uv run --extra dev pytest
 
 ## 📚 Documentation Index
 
-Detailed engineering specifications are available in the [`docs/`](file:///D:/Projects/dualquery/docs/) directory:
+Detailed engineering specifications are available in the [`docs/`](docs/) directory:
 
-* **[`docs/00_EXECUTIVE_SUMMARY_AND_VISION.md`](file:///D:/Projects/dualquery/docs/00_EXECUTIVE_SUMMARY_AND_VISION.md)** — Product identity, 3 commercial adoption tracks, and resume positioning.
-* **[`docs/01_SYSTEM_ARCHITECTURE_AND_OPTIMIZER_SPEC.md`](file:///D:/Projects/dualquery/docs/01_SYSTEM_ARCHITECTURE_AND_OPTIMIZER_SPEC.md)** — Consolidated DuckDB architecture, entity grounder, and physical cost equations.
-* **[`docs/02_ZERO_TRUST_SECURITY_AND_MCP_PROTOCOL.md`](file:///D:/Projects/dualquery/docs/02_ZERO_TRUST_SECURITY_AND_MCP_PROTOCOL.md)** — Zero-Trust MCP server specs, 5-gate `SQLGlot` AST security guard, and PII scrubber.
-* **[`docs/03_COMPETITIVE_TEARDOWN_AND_STAFF_DEFENSE.md`](file:///D:/Projects/dualquery/docs/03_COMPETITIVE_TEARDOWN_AND_STAFF_DEFENSE.md)** — 2026 competitor matrix (Glean, Onyx, Hebbia, Snowflake Cortex, LOTUS) and interview defenses.
-* **[`docs/04_DATA_SCHEMAS_BENCHMARKS_AND_ROADMAP.md`](file:///D:/Projects/dualquery/docs/04_DATA_SCHEMAS_BENCHMARKS_AND_ROADMAP.md)** — DuckDB SQL schemas, BYOE adapter, repository structure, and the 5-phase timeline.
-* **[`docs/05_IDEATION_HISTORY_AND_CRITIQUE_LOG.md`](file:///D:/Projects/dualquery/docs/05_IDEATION_HISTORY_AND_CRITIQUE_LOG.md)** — Preserved log of brainstorming, candidate evaluations, and subagent stress-tests.
+* **[`docs/00_EXECUTIVE_SUMMARY_AND_VISION.md`](docs/00_EXECUTIVE_SUMMARY_AND_VISION.md)** — Product identity, commercial tracks, and benchmark highlights.
+* **[`docs/01_SYSTEM_ARCHITECTURE_AND_OPTIMIZER_SPEC.md`](docs/01_SYSTEM_ARCHITECTURE_AND_OPTIMIZER_SPEC.md)** — Consolidated DuckDB architecture, entity grounder, and physical cost equations.
+* **[`docs/02_ZERO_TRUST_SECURITY_AND_MCP_PROTOCOL.md`](docs/02_ZERO_TRUST_SECURITY_AND_MCP_PROTOCOL.md)** — Zero-Trust MCP server specs, 5-gate `SQLGlot` AST security guard, and PII scrubber.
+* **[`docs/03_COMPETITIVE_TEARDOWN_AND_STAFF_DEFENSE.md`](docs/03_COMPETITIVE_TEARDOWN_AND_STAFF_DEFENSE.md)** — 2026 competitor matrix (Glean, Onyx, Hebbia, Snowflake Cortex, LOTUS) and architecture trade-off defenses.
+* **[`docs/04_DATA_SCHEMAS_BENCHMARKS_AND_ROADMAP.md`](docs/04_DATA_SCHEMAS_BENCHMARKS_AND_ROADMAP.md)** — DuckDB SQL schemas, BYOE adapter, repository structure, and 5-phase build history.
 
 ---
 
 ## 🗺️ Completed 5-Phase Roadmap
 
-* [x] **Phase 1: Unified DuckDB Engine & Ingestion Pipeline** — 99k Olist records across 9 tables + BGE-Base 768-d vectors + HNSW (`vss`) and BM25 (`fts`) indexes in `olist.duckdb`.
+* [x] **Phase 1: Unified DuckDB Engine & Ingestion Pipeline** — ~99k Olist records across 9 tables + BGE-Base 768-d vectors + HNSW (`vss`) and BM25 (`fts`) indexes in `olist.duckdb`.
 * [x] **Phase 2: Cost-Based Physical Planner & Literal Grounder** — Pre-flight cardinality probe (`<2ms`), dynamic Plan A (SIMD) vs Plan B (HNSW+BM25 RRF) with empirical 5,000 threshold, RapidFuzz literal grounder (100% optimizer accuracy).
 * [x] **Phase 3: `SQLGlot` AST Security Compiler & PII Vault** — 5-gate AST security compiler, table & column qualifier whitelisting, HMAC-SHA256 tokenization, Luhn credit card scrubber (100% block rate on 30 red-team attacks).
-* [x] **Phase 4: Zero-Trust MCP Server (MCP 2.3.0)** — Official Model Context Protocol integration exposing `get_governed_catalog`, `resolve_entity_literals`, and `execute_hybrid_query` over JSON-RPC 2.0 stdio.
-* [x] **Phase 5: Commercial BYOE Audit Engine & Telemetry UI** — Universal 2-table CSV ingestion adapter (`byoe_adapter.py`), AVX2 SIMD matrix root-cause clustering ($0.84\text{ms}$), DuckDB relational financial aggregation, Rich Bloomberg-grade terminal dashboard, and CLI interface (`dualquery audit`).
+* [x] **Phase 4: Zero-Trust MCP Server (`mcp >= 2.3.0`)** — Official Model Context Protocol integration exposing `get_governed_catalog`, `resolve_entity_literals`, and `execute_hybrid_query` over JSON-RPC 2.0 (`stdio`, `sse`, and `streamable-http`).
+* [x] **Phase 5: Commercial BYOE Audit Engine & Telemetry UI** — Universal 2-table CSV ingestion adapter (`byoe_adapter.py`), AVX2 SIMD matrix root-cause clustering, DuckDB relational financial aggregation, Rich terminal dashboard, and CLI interface (`dualquery audit`).

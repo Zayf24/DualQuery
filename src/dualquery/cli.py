@@ -70,8 +70,8 @@ def handle_audit(args: argparse.Namespace) -> None:
 
 def handle_serve(args: argparse.Namespace) -> None:
     """Handle 'dualquery serve' command."""
-    from dualquery.mcp.server import main as serve_main
-    serve_main()
+    from dualquery.mcp.server import run_server
+    run_server(transport=args.transport, host=args.host, port=args.port)
 
 
 def main() -> None:
@@ -100,6 +100,14 @@ def main() -> None:
 
     # Serve command
     serve_parser = subparsers.add_parser("serve", help="Start the JSON-RPC 2.0 Zero-Trust MCP Server")
+    serve_parser.add_argument(
+        "--transport",
+        choices=["stdio", "sse", "streamable-http"],
+        default="stdio",
+        help="MCP transport protocol (default: stdio)",
+    )
+    serve_parser.add_argument("--host", default="127.0.0.1", help="Bind host for SSE/HTTP transports")
+    serve_parser.add_argument("--port", type=int, default=8000, help="Bind port for SSE/HTTP transports")
     serve_parser.set_defaults(func=handle_serve)
 
     args = parser.parse_args()

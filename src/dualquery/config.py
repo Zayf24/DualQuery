@@ -7,9 +7,11 @@ import os
 from pathlib import Path
 from pydantic import BaseModel, Field
 
-# Ensure heavy model and tool caches live on the spacious D: drive
-os.environ.setdefault("HF_HOME", "D:\\.cache\\huggingface")
-os.environ.setdefault("UV_CACHE_DIR", "D:\\.cache\\uv")
+# Keep heavy model caches on D: drive on Windows workstations when present,
+# while remaining portable across macOS/Linux/single-drive setups.
+if os.name == "nt" and Path("D:\\.cache").exists():
+    os.environ.setdefault("HF_HOME", "D:\\.cache\\huggingface")
+    os.environ.setdefault("UV_CACHE_DIR", "D:\\.cache\\uv")
 
 
 class Settings(BaseModel):

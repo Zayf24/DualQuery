@@ -316,11 +316,36 @@ def execute_hybrid_query(
         }
 
 
-def main():
-    """Main entrypoint for running dualquery-mcp over stdio."""
+def run_server(
+    transport: str = "stdio",
+    host: str = "127.0.0.1",
+    port: int = 8000,
+) -> None:
+    """Start DualQuery MCP Server over stdio, sse, or streamable-http."""
     logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s")
-    logger.info("Starting DualQuery MCP Server (stdio transport)...")
-    mcp_server.run()
+    if transport == "stdio":
+        logger.info("Starting DualQuery MCP Server (stdio transport)...")
+        mcp_server.run(transport="stdio")
+    else:
+        logger.info(f"Starting DualQuery MCP Server ({transport} transport on {host}:{port})...")
+        mcp_server.run(transport=transport, host=host, port=port)  # type: ignore[arg-type]
+
+
+def main() -> None:
+    """CLI entrypoint for `dualquery-mcp` supporting stdio, sse, and streamable-http transports."""
+    import argparse
+
+    parser = argparse.ArgumentParser(description="Start DualQuery Zero-Trust MCP Server")
+    parser.add_argument(
+        "--transport",
+        choices=["stdio", "sse", "streamable-http"],
+        default="stdio",
+        help="MCP transport protocol (default: stdio)",
+    )
+    parser.add_argument("--host", default="127.0.0.1", help="Bind host for SSE/HTTP transports")
+    parser.add_argument("--port", type=int, default=8000, help="Bind port for SSE/HTTP transports")
+    args = parser.parse_args()
+    run_server(transport=args.transport, host=args.host, port=args.port)
 
 
 if __name__ == "__main__":

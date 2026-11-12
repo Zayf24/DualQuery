@@ -36,12 +36,13 @@ dualquery-mcp = "dualquery.mcp.server:main"
 requires = ["hatchling"]
 build-backend = "hatchling.build"
 
-[tool.uv]
-cache-dir = "D:/.cache/uv"
+[tool.pytest.ini_options]
+pythonpath = ["."]
+asyncio_default_fixture_loop_scope = "function"
 
 [tool.uv.sources]
 torch = [
-  { index = "pytorch-cu124" },
+  { index = "pytorch-cu124", marker = "sys_platform == 'win32'" },
 ]
 
 [[tool.uv.index]]

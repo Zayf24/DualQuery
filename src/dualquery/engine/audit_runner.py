@@ -113,9 +113,8 @@ class CommercialAuditRunner:
         # 2. Fetch Feedback Notes & Vectors from DuckDB
         conn = duckdb.connect(str(self.db_path))
         try:
-            conn.execute("LOAD vss;")
             df_notes = conn.execute("""
-                SELECT note_id, tx_id, severity_score, raw_text, embedding 
+                SELECT note_id, tx_id, severity_score, raw_text, note_timestamp, embedding
                 FROM canonical_feedback
             """).fetchdf()
 
@@ -136,23 +135,52 @@ class CommercialAuditRunner:
             # Register classified feedback into DuckDB view
             conn.register("classified_feedback_view", df_notes)
 
-            # 4. Relational Aggregation Across ERP Invoices & Returns
+            # 4. Relational Aggregation Across ERP Invoices & Returns.
+            # A transaction can have several notes, possibly in different clusters. Its money is
+            # attributed once, to the cluster of its earliest note, so cluster totals add up exactly.
             agg_query = """
-                SELECT 
-                    cf.cluster_name,
-                    COUNT(DISTINCT cf.note_id) AS incident_count,
-                    COUNT(DISTINCT ct.tx_id) AS impacted_orders,
-                    COUNT(DISTINCT ct.party_id) AS impacted_parties,
-                    COALESCE(SUM(CASE WHEN ct.status IN ('Returned', 'Canceled') THEN ct.amount ELSE 0 END), 0.0) AS gross_revenue_at_risk,
-                    COALESCE(SUM(ct.freight_or_tax), 0.0) AS total_freight_loss,
-                    ROUND(COALESCE(AVG(cf.severity_score), 0.0), 2) AS avg_severity,
-                    ROUND(COALESCE(AVG(ct.delay_days), 0.0), 1) AS avg_delay_days,
-                    MODE(ct.category) AS top_category,
-                    MODE(ct.region) AS top_region
-                FROM classified_feedback_view cf
-                LEFT JOIN canonical_transactions ct ON cf.tx_id = ct.tx_id
-                GROUP BY cf.cluster_name
-                ORDER BY gross_revenue_at_risk DESC;
+                WITH tx_cluster AS (
+                    SELECT tx_id, cluster_name FROM (
+                        SELECT tx_id, cluster_name, ROW_NUMBER() OVER (
+                            PARTITION BY tx_id ORDER BY note_timestamp NULLS LAST, note_id
+                        ) AS rn
+                        FROM classified_feedback_view
+                    ) WHERE rn = 1
+                ),
+                incidents AS (
+                    SELECT cluster_name,
+                           COUNT(DISTINCT note_id) AS incident_count,
+                           ROUND(AVG(severity_score), 2) AS avg_severity
+                    FROM classified_feedback_view
+                    GROUP BY cluster_name
+                ),
+                money AS (
+                    SELECT tc.cluster_name,
+                           COUNT(DISTINCT ct.tx_id) AS impacted_orders,
+                           COUNT(DISTINCT ct.party_id) AS impacted_parties,
+                           SUM(CASE WHEN ct.status IN ('Returned', 'Canceled') THEN ct.amount ELSE 0 END) AS gross_revenue_at_risk,
+                           SUM(ct.freight_or_tax) AS total_freight_loss,
+                           ROUND(AVG(ct.delay_days), 1) AS avg_delay_days,
+                           MODE(ct.category) AS top_category,
+                           MODE(ct.region) AS top_region
+                    FROM tx_cluster tc
+                    JOIN canonical_transactions ct ON tc.tx_id = ct.tx_id
+                    GROUP BY tc.cluster_name
+                )
+                SELECT
+                    i.cluster_name,
+                    i.incident_count,
+                    COALESCE(m.impacted_orders, 0) AS impacted_orders,
+                    COALESCE(m.impacted_parties, 0) AS impacted_parties,
+                    COALESCE(m.gross_revenue_at_risk, 0.0) AS gross_revenue_at_risk,
+                    COALESCE(m.total_freight_loss, 0.0) AS total_freight_loss,
+                    COALESCE(i.avg_severity, 0.0) AS avg_severity,
+                    COALESCE(m.avg_delay_days, 0.0) AS avg_delay_days,
+                    COALESCE(m.top_category, 'n/a') AS top_category,
+                    COALESCE(m.top_region, 'n/a') AS top_region
+                FROM incidents i
+                LEFT JOIN money m ON i.cluster_name = m.cluster_name
+                ORDER BY gross_revenue_at_risk DESC, i.cluster_name;
             """
             df_cluster_metrics = conn.execute(agg_query).fetchdf()
 

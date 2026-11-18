@@ -11,12 +11,10 @@ import logging
 from typing import List, Dict, Any, Optional
 from mcp.server.mcpserver import MCPServer
 
-from dualquery.config import settings
 from dualquery.engine.executor import HybridExecutor
 from dualquery.engine.physical_planner import HybridQueryRequest
 from dualquery.engine.literal_grounder import LiteralGrounder
 from dualquery.security.ast_guard import (
-    ASTGuard,
     SecurityPolicy,
     ANALYST_POLICY,
     SUPPORT_AGENT_POLICY,
@@ -111,6 +109,9 @@ BASE_CATALOG = {
     },
 }
 
+# The role is fixed by whoever starts the server (`--role`), never by the model calling the tools.
+ACTIVE_POLICY: SecurityPolicy = ANALYST_POLICY
+
 # Shared singletons for high performance
 _executor: Optional[HybridExecutor] = None
 _grounder: Optional[LiteralGrounder] = None
@@ -126,7 +127,8 @@ def get_executor() -> HybridExecutor:
 def get_grounder() -> LiteralGrounder:
     global _grounder
     if _grounder is None:
-        _grounder = LiteralGrounder()
+        # Reuse the executor's embedder so the semantic tier ('cosmetics' -> 'health_beauty') is active.
+        _grounder = LiteralGrounder(embedder=get_executor().embedder)
     return _grounder
 
 
@@ -134,15 +136,12 @@ def get_grounder() -> LiteralGrounder:
 # MCP Tool 1: get_governed_catalog
 # ==============================================================================
 @mcp_server.tool()
-def get_governed_catalog(role: str = "analyst") -> Dict[str, Any]:
+def get_governed_catalog() -> Dict[str, Any]:
     """
-    Inspect database tables, columns, foreign keys, and allowed metrics authorized for your role.
+    Inspect database tables, columns, foreign keys, and allowed metrics authorized for this server's role.
     Always call this first to discover valid tables and column names before writing queries.
-
-    Args:
-        role: Active user role ('analyst', 'support_agent', or 'seller_restricted').
     """
-    policy = ROLE_POLICIES.get(role.lower(), ANALYST_POLICY)
+    policy = ACTIVE_POLICY
     allowed_tables = {t.lower() for t in policy.allowed_tables}
 
     governed_tables = {
@@ -169,7 +168,8 @@ def get_governed_catalog(role: str = "analyst") -> Dict[str, Any]:
         "guidelines": (
             "1. Tables and columns outside this list are forbidden and will be rejected by the AST security guard. "
             "2. Direct selection or filtering on customer tax IDs, phones, or credit cards is strictly blocked. "
-            "3. Use resolve_entity_literals to verify state abbreviations and category names before querying."
+            "3. Use resolve_entity_literals to verify state abbreviations and category names before querying. "
+            "4. Each aggregation may use at most one of order_payments, order_items, order_reviews."
         ),
     }
 
@@ -222,7 +222,7 @@ def execute_hybrid_query(
     bm25_keywords: Optional[str] = None,
     aggregations: Optional[List[str]] = None,
     limit: int = 5,
-    role: str = "analyst",
+    match_top_percent: float = 1.0,
 ) -> Dict[str, Any]:
     """
     Execute a compound hybrid query joining structured SQL tables with unstructured review text.
@@ -232,9 +232,11 @@ def execute_hybrid_query(
         sql_filter: Relational SQL WHERE clause (e.g. "customers.customer_state = 'RJ' AND order_payments.payment_value > 300").
         semantic_query: Natural language complaint or concept to search for in customer reviews.
         bm25_keywords: Optional specific keywords for lexical BM25 matching (auto-extracted if omitted).
-        aggregations: List of SQL aggregations to compute over matching orders (e.g. ["COUNT(*)", "SUM(order_payments.payment_value)"]).
+        aggregations: SQL aggregations computed once per distinct order (e.g. ["COUNT(*)", "SUM(order_payments.payment_value)"]).
+            Each one may use at most one of order_payments, order_items, order_reviews.
         limit: Number of top cited review evidence snippets to return (max 10).
-        role: User role ('analyst', 'support_agent', or 'seller_restricted').
+        match_top_percent: A review counts as matching semantic_query if it is among this % of all
+            reviews most similar to it (default 1.0). Lower is stricter. Drives aggregates.matched_scope.
     """
     if not semantic_query or not semantic_query.strip():
         return {
@@ -243,7 +245,7 @@ def execute_hybrid_query(
             "message": "semantic_query must be provided for hybrid retrieval.",
         }
 
-    policy = ROLE_POLICIES.get(role.lower(), ANALYST_POLICY)
+    policy = ACTIVE_POLICY
     capped_limit = min(max(1, limit), 10)
     target_aggregations = aggregations or [
         "COUNT(DISTINCT orders.order_id) AS total_orders",
@@ -256,6 +258,7 @@ def execute_hybrid_query(
         bm25_keywords=bm25_keywords,
         aggregations=target_aggregations,
         limit=capped_limit,
+        match_top_percent=min(max(0.01, match_top_percent), 100.0),
     )
 
     executor = get_executor()
@@ -284,7 +287,18 @@ def execute_hybrid_query(
                 "engine_latency_ms": res.engine_latency_ms,
                 "total_turn_ms": res.total_latency_ms,
             },
-            "aggregates": {k: str(v) for k, v in res.aggregates.items()},
+            "aggregates": {
+                "filter_scope": {
+                    "description": "Every order matching sql_filter",
+                    "orders": res.estimated_candidates,
+                    "metrics": {k: str(v) for k, v in res.aggregates.items()},
+                },
+                "matched_scope": {
+                    "description": f"Orders matching sql_filter with a review in the top {request.match_top_percent}% most similar to semantic_query",
+                    "orders": res.matched_orders,
+                    "metrics": {k: str(v) for k, v in res.matched_aggregates.items()},
+                },
+            },
             "citations_returned": len(formatted_citations),
             "citations": formatted_citations,
             "security_governance": {
@@ -307,12 +321,16 @@ def execute_hybrid_query(
                 "for permitted tables/columns and ensure only read-only SELECT filters are used."
             ),
         }
+    except ValueError as e:
+        # Our own validation messages (e.g. a metric that would double count) are safe and actionable.
+        return {"status": "execution_error", "error_type": "ValueError", "message": str(e)}
     except Exception as e:
+        # Full details stay in the server log; the model only gets the first line (no SQL text or paths).
         logger.error(f"Execution failed: {e}", exc_info=True)
         return {
             "status": "execution_error",
             "error_type": type(e).__name__,
-            "message": str(e),
+            "message": str(e).splitlines()[0][:200],
         }
 
 
@@ -320,9 +338,15 @@ def run_server(
     transport: str = "stdio",
     host: str = "127.0.0.1",
     port: int = 8000,
+    role: str = "analyst",
 ) -> None:
-    """Start DualQuery MCP Server over stdio, sse, or streamable-http."""
-    logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s")
+    """Start DualQuery MCP Server over stdio, sse, or streamable-http with a fixed role."""
+    global ACTIVE_POLICY
+    if role not in ROLE_POLICIES:
+        raise ValueError(f"Unknown role '{role}'. Choose one of {sorted(ROLE_POLICIES)}.")
+    ACTIVE_POLICY = ROLE_POLICIES[role]
+    # stdout carries the stdio JSON-RPC stream, so logs must go to stderr.
+    logging.basicConfig(stream=sys.stderr, level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s")
     if transport == "stdio":
         logger.info("Starting DualQuery MCP Server (stdio transport)...")
         mcp_server.run(transport="stdio")
@@ -344,8 +368,9 @@ def main() -> None:
     )
     parser.add_argument("--host", default="127.0.0.1", help="Bind host for SSE/HTTP transports")
     parser.add_argument("--port", type=int, default=8000, help="Bind port for SSE/HTTP transports")
+    parser.add_argument("--role", choices=sorted(ROLE_POLICIES), default="analyst", help="Security role for every tool call")
     args = parser.parse_args()
-    run_server(transport=args.transport, host=args.host, port=args.port)
+    run_server(transport=args.transport, host=args.host, port=args.port, role=args.role)
 
 
 if __name__ == "__main__":

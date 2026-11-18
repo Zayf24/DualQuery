@@ -60,7 +60,7 @@ CREATE TABLE IF NOT EXISTS order_items (
     PRIMARY KEY (order_id, order_item_id)
 );
 
--- 3. Customer Reviews with Unified 768-d Embeddings (Compatible with EmbeddingGemma 2 & BGE-Base)
+-- 3. Customer Reviews with Unified 768-d Embeddings (BAAI/bge-base-en-v1.5)
 
 CREATE TABLE IF NOT EXISTS order_reviews (
     review_id VARCHAR PRIMARY KEY,

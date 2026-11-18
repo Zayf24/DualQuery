@@ -1,7 +1,7 @@
 """
 DualQuery Commercial Bring-Your-Own-Export (BYOE) Universal Ingestion Adapter.
-Maps arbitrary 2-table business CSV/Excel exports (invoices/orders + return/complaint notes)
-into unified, indexed DuckDB tables with 768-d embeddings, HNSW, and BM25 indexes.
+Maps arbitrary 2-table business CSV exports (invoices/orders + return/complaint notes)
+into unified DuckDB tables with 768-d note embeddings.
 """
 
 import time
@@ -129,13 +129,9 @@ class BYOEAdapter:
         self.embedder = embedder or get_embedding_provider("auto")
 
     def init_database(self, conn: duckdb.DuckDBPyConnection) -> None:
-        """Create canonical relational and vector tables with HNSW and BM25 indexes."""
-        conn.execute("INSTALL vss; LOAD vss;")
-        conn.execute("INSTALL fts; LOAD fts;")
-        conn.execute("SET hnsw_enable_experimental_persistence = true;")
-
+        """Create the canonical transaction and feedback tables."""
         conn.execute("""
-            CREATE TABLE IF NOT EXISTS canonical_transactions (
+            CREATE TABLE canonical_transactions (
                 tx_id VARCHAR PRIMARY KEY,
                 party_id VARCHAR,
                 category VARCHAR,
@@ -147,35 +143,13 @@ class BYOEAdapter:
                 delay_days INTEGER
             );
 
-            CREATE TABLE IF NOT EXISTS canonical_feedback (
+            CREATE TABLE canonical_feedback (
                 note_id VARCHAR PRIMARY KEY,
                 tx_id VARCHAR REFERENCES canonical_transactions(tx_id),
                 severity_score TINYINT,
                 raw_text VARCHAR,
                 note_timestamp TIMESTAMP,
                 embedding FLOAT[768]
-            );
-        """)
-
-    def build_indexes(self, conn: duckdb.DuckDBPyConnection) -> None:
-        """Construct HNSW vector index and BM25 full-text search index."""
-        logger.info("Constructing HNSW vector index on canonical_feedback...")
-        conn.execute("""
-            CREATE INDEX IF NOT EXISTS idx_canonical_feedback_hnsw
-            ON canonical_feedback USING HNSW (embedding)
-            WITH (metric = 'cosine', ef_construction = 128, M = 16);
-        """)
-
-        logger.info("Constructing BM25 full-text search index...")
-        conn.execute("""
-            PRAGMA create_fts_index(
-                'canonical_feedback',
-                'note_id',
-                'raw_text',
-                stemmer = 'english',
-                stopwords = 'english',
-                lower = 1,
-                overwrite = 1
             );
         """)
 
@@ -245,21 +219,20 @@ class BYOEAdapter:
         embeddings = self.embedder.embed_documents(texts, batch_size=batch_size)
         canonical_fb["embedding"] = embeddings
 
-        # 5. Insert into DuckDB
+        # 5. Write a fresh DuckDB file: each ingest replaces the previous dataset instead of merging into it.
+        for stale in (self.db_path, self.db_path.with_name(self.db_path.name + ".wal")):
+            stale.unlink(missing_ok=True)
         conn = duckdb.connect(str(self.db_path))
         try:
             self.init_database(conn)
 
             logger.info(f"Writing {len(canonical_tx)} rows into canonical_transactions...")
             conn.register("df_tx_view", canonical_tx)
-            conn.execute("INSERT OR REPLACE INTO canonical_transactions SELECT * FROM df_tx_view")
+            conn.execute("INSERT INTO canonical_transactions SELECT * FROM df_tx_view")
 
             logger.info(f"Writing {len(canonical_fb)} rows into canonical_feedback...")
             conn.register("df_fb_view", canonical_fb)
-            conn.execute("INSERT OR REPLACE INTO canonical_feedback SELECT * FROM df_fb_view")
-
-            # Build HNSW and BM25 indexes
-            self.build_indexes(conn)
+            conn.execute("INSERT INTO canonical_feedback SELECT * FROM df_fb_view")
             conn.checkpoint()
         finally:
             conn.close()

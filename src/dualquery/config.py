@@ -13,28 +13,29 @@ if os.name == "nt" and Path("D:\\.cache").exists():
     os.environ.setdefault("HF_HOME", "D:\\.cache\\huggingface")
     os.environ.setdefault("UV_CACHE_DIR", "D:\\.cache\\uv")
 
+_ROOT = Path(__file__).resolve().parent.parent.parent
+
 
 class Settings(BaseModel):
     # Base Directories
-    PROJECT_ROOT: Path = Field(default_factory=lambda: Path(__file__).resolve().parent.parent.parent)
-    DATA_DIR: Path = Field(default_factory=lambda: Path(__file__).resolve().parent.parent.parent / "data")
-    SQL_DIR: Path = Field(default_factory=lambda: Path(__file__).resolve().parent.parent.parent / "sql")
-    
-    # DuckDB Database File
-    DUCKDB_PATH: Path = Field(default_factory=lambda: Path(__file__).resolve().parent.parent.parent / "data" / "olist.duckdb")
-    
-    # Embedding Configuration
-    # Unified dimension: 768 (EmbeddingGemma 2, Nomic-Embed-v1.5, or BGE-Base)
+    DATA_DIR: Path = _ROOT / "data"
+    SQL_DIR: Path = _ROOT / "sql"
+
+    # DuckDB Database File (override with DUALQUERY_DB_PATH to serve another Olist build)
+    DUCKDB_PATH: Path = Field(
+        default_factory=lambda: Path(os.environ.get("DUALQUERY_DB_PATH", _ROOT / "data" / "olist.duckdb"))
+    )
+
+    # Embedding Configuration (BAAI/bge-base-en-v1.5, 768 dimensions)
     EMBEDDING_DIM: int = 768
     PRIMARY_EMBEDDING_MODEL: str = "BAAI/bge-base-en-v1.5"
-    FALLBACK_EMBEDDING_MODEL: str = "BAAI/bge-base-en-v1.5"
     EMBEDDING_BATCH_SIZE: int = 256
-    
-    # Optimizer Thresholds
-    # Empirically measured inflection threshold (benchmarks/evaluate_optimizer.py):
-    # SIMD vector scan maintains sub-400ms latency and 100% recall up to ~5,000 candidates.
-    # Beyond 5,000 candidates, Plan B (HNSW + BM25 RRF) is engaged.
-    PLAN_A_CARDINALITY_LIMIT: int = 5000
+
+    # Optimizer Threshold: filters matching <= this many orders run Plan A (exact scan, 100% recall),
+    # broader filters run Plan B (HNSW + BM25 RRF). 30,000 is the measured latency crossover on the
+    # 99k-order Olist build (benchmarks/evaluate_optimizer.py): exact scan is faster up to ~20k orders,
+    # Plan B is faster from ~42k.
+    PLAN_A_CARDINALITY_LIMIT: int = 30000
 
 
 settings = Settings()

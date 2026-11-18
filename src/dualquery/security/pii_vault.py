@@ -1,7 +1,7 @@
 """
 DualQuery Local In-Process PII Vault & Redaction Engine.
 Provides:
-1. Reversible HMAC-SHA256 Primary Key Tokenization ([CUST_491A])
+1. Deterministic keyed HMAC-SHA256 pseudonyms for identifiers ([ORD_491A0B2C])
 2. High-precision pattern scrubbing for Emails, Phones, CPFs, Cards, and Street Addresses.
 Guarantees zero customer PII leaves the local machine.
 """
@@ -12,7 +12,7 @@ import re
 import hmac
 import hashlib
 import secrets
-from typing import TYPE_CHECKING, Dict, Optional, Tuple, Any
+from typing import TYPE_CHECKING, Dict, Optional
 from pydantic import BaseModel, Field
 
 if TYPE_CHECKING:
@@ -45,7 +45,7 @@ class PIIScrubResult(BaseModel):
 class PIIVault:
     """
     In-Process Zero-Trust PII Tokenizer & Text Sanitizer.
-    Maintains a session salt for keyed HMAC tokenization and applies compiled regex patterns.
+    Holds a per-process secret salt for keyed HMAC pseudonyms and applies compiled regex patterns.
     """
 
     # Pre-compiled high-precision regex patterns
@@ -83,9 +83,6 @@ class PIIVault:
 
     def __init__(self, session_salt: Optional[str] = None):
         self.salt = (session_salt or secrets.token_hex(16)).encode("utf-8")
-        # In-memory reversible mapping for session: token -> real_id
-        self._token_to_id: Dict[str, str] = {}
-        self._id_to_token: Dict[str, str] = {}
 
     def tokenize_identifier(self, real_id: str, prefix: str = "ID") -> str:
         """
@@ -95,19 +92,8 @@ class PIIVault:
         if not real_id:
             return ""
 
-        if real_id in self._id_to_token:
-            return self._id_to_token[real_id]
-
         digest = hmac.new(self.salt, real_id.encode("utf-8"), hashlib.sha256).hexdigest()
-        short_token = f"[{prefix.upper()}_{digest[:8].upper()}]"
-
-        self._token_to_id[short_token] = real_id
-        self._id_to_token[real_id] = short_token
-        return short_token
-
-    def detokenize_identifier(self, token: str) -> Optional[str]:
-        """Resolve an opaque token back to the real ID (for authorized audit roles only)."""
-        return self._token_to_id.get(token)
+        return f"[{prefix.upper()}_{digest[:8].upper()}]"
 
     def scrub_text(self, text: str) -> PIIScrubResult:
         """
@@ -154,13 +140,6 @@ class PIIVault:
             total_redactions += len(cnpjs)
 
         # 4. Redact Phone Numbers
-        phones = self.PHONE_PATTERN.findall(sanitized)
-        if phones:
-            sanitized = self.PHONE_PATTERN.sub("[PHONE_REDACTED]", sanitized)
-            details["phone"] = len(phones)
-            total_redactions += len(phones)
-
-        # 5. Redact Physical Addresses
         phones = self.PHONE_PATTERN.findall(sanitized)
         if phones:
             sanitized = self.PHONE_PATTERN.sub("[PHONE_REDACTED]", sanitized)

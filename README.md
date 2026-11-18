@@ -5,136 +5,125 @@
 ![MCP](https://img.shields.io/badge/MCP-2.3%2B-informational)
 ![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)
 
-**DualQuery** is a zero-trust hybrid relational-semantic query engine and Model Context Protocol (MCP) server built with **Python**, **DuckDB**, **SQLGlot**, **FastEmbed/PyTorch**, and the **Official MCP SDK (`stdio`, `SSE`, `Streamable HTTP`)**. It compiles natural language business questions into cost-optimized execution plans across structured SQL tables and unstructured text records without exposing raw database rows or PII to external LLM contexts.
+**DualQuery** is a zero-trust hybrid relational-semantic query engine exposed as a Model Context Protocol (MCP) server. An LLM agent asks questions that need both SQL math and semantic search over free text ("how much revenue came from Rio de Janeiro orders whose reviews complain about broken packaging?"). DualQuery runs the SQL filter, vector + BM25 retrieval, aggregation and PII redaction **inside DuckDB on the local machine**, and only returns metrics and scrubbed, pseudonymized evidence to the model.
+
+Built with Python, DuckDB (`vss` HNSW, `fts` BM25), SQLGlot, SentenceTransformers / FastEmbed (`BAAI/bge-base-en-v1.5`), RapidFuzz, and the official MCP SDK (`stdio`, `SSE`, `streamable-http`).
 
 ---
 
-## Core Engineering Problem
+## The problem
 
-Operational enterprise datasets split truth across structured OLTP/OLAP tables (orders, payments, inventory, shipping dates) and unstructured text (customer reviews, support tickets, return remarks). Existing approaches fail in predictable ways:
+Business truth is split between tables (orders, payments, delivery dates) and text (reviews, tickets, return notes):
 
-* **Pure Vector RAG:** Cannot execute deterministic SQL aggregations (`SUM`, `AVG`, `COUNT`, `GROUP BY`) or multi-table foreign-key joins.
-* **Pure Text-to-SQL:** Relies on brittle `LIKE '%...%'` filters that miss semantic equivalents and frequently fails on ungrounded enum literals.
-* **Long-Context Table Stuffing:** Streaming tens of thousands of raw rows into cloud LLMs incurs high token latency (25–40s), causes arithmetic hallucinations, and leaks regulated PII externally.
-* **Standard Database MCP Servers:** Execute raw `SELECT` statements and serialize sensitive table rows directly over JSON-RPC.
-
-DualQuery resolves this through **Plan-Shipping**: SQL filtering, OLAP math, HNSW + BM25 vector retrieval, and PII redaction all execute in-process inside DuckDB. Only verified aggregates and scrubbed citations cross the MCP transport boundary.
+* **Vector RAG alone** cannot do exact `SUM` / `COUNT` / joins.
+* **Text-to-SQL alone** falls back to brittle `LIKE '%broken%'` and silently returns zero rows on unknown enum spellings.
+* **Stuffing rows into the context window** is slow, error-prone for arithmetic, and ships PII to a third party.
+* **Generic database MCP servers** run raw SQL and serialize raw rows over JSON-RPC.
+* **Filtered vector search done naively** (ANN top-k, then apply the SQL filter) loses most results when the filter is selective. Measured on this dataset: **14.7% recall@10** when the filter keeps ≤ 5,000 of 99,441 orders (see benchmarks).
 
 ---
 
-## System Architecture
+## Architecture
 
 ```mermaid
 flowchart TD
-    subgraph Host["MCP Client (Claude Desktop, Cursor, or Custom Agent)"]
-        User["Natural Language Query"] --> LLMPlanner["LLM Intent Decomposer"]
-        LLMSynth["LLM Response Synthesis"] --> Output["Verified Metrics + Scrubbed Citations"]
+    subgraph Host["MCP client (Claude Desktop, Cursor, custom agent)"]
+        User["Natural-language question"] --> LLM["LLM plans tool calls"]
+        LLM --> Answer["Answer from verified metrics + scrubbed citations"]
     end
 
-    subgraph Edge["Zero-Trust Local Execution Boundary (dualquery-mcp)"]
-        LLMPlanner -- "1. resolve_entity_literals()" --> Grounder["Pre-SQL Literal Grounder<br/>(RapidFuzz + Embedding Lookup)"]
-        Grounder -- "Exact DB Enums ('SP', 'credit_card')" --> LLMPlanner
-
-        LLMPlanner -- "2. execute_hybrid_query()" --> Gateway["Role-Based Policy Engine<br/>(Analyst, Support Agent, Restricted)"]
-        Gateway --> ASTGuard["5-Gate SQLGlot AST Security Guard<br/>- Blocks DDL/DML & multi-statements<br/>- Whitelists tables & column qualifiers<br/>- Strips PII & enforces RLS predicates"]
-
-        ASTGuard --> Probe["Pre-Flight Cardinality Probe<br/>(SQL COUNT(*) Predicate Check)"]
-        Probe --> Decision{"Filtered Rows N_cand <= 5,000?"}
-
-        Decision -- "Yes: High Selectivity (Plan A)" --> PlanA["Plan A: SQL Pushdown + Exact SIMD Scan<br/>100% Vector Recall on Filtered Subset"]
-        Decision -- "No: Broad Scope (Plan B)" --> PlanB["Plan B: Parallel HNSW + BM25 (RRF)<br/>Hash-Joined with SQL Aggregates"]
-
-        PlanA --> Agg["In-Process DuckDB OLAP Aggregator<br/>(SUM, AVG, COUNT)"]
-        PlanB --> Agg
-        Agg --> Scrubber["Local PII Vault & HMAC Tokenizer<br/>([ORD_...], phone/email redaction)"]
+    subgraph Edge["Local execution boundary (dualquery-mcp, role fixed at startup)"]
+        LLM -- "1. resolve_entity_literals" --> Grounder["Literal grounder<br/>aliases + RapidFuzz + embedding tier"]
+        LLM -- "2. execute_hybrid_query" --> Guard["5-gate SQLGlot AST guard<br/>read-only, no file/network funcs,<br/>table RBAC, PII columns, RLS + LIMIT rewrite"]
+        Guard -- "validated filter (RLS appended)" --> Probe["Cardinality probe<br/>COUNT(DISTINCT order_id)"]
+        Probe --> Decide{"N_cand <= 30,000?"}
+        Decide -- yes --> A["Plan A: SQL filter, then exact cosine scan<br/>(100% recall by construction)"]
+        Decide -- no --> B["Plan B: HNSW + BM25 top-k (pool sized by selectivity),<br/>RRF fusion, then SQL filter"]
+        A --> Metrics["Fan-out-safe metrics<br/>filter_scope + matched_scope"]
+        B --> Metrics
+        Metrics --> Vault["PII vault<br/>regex + Luhn redaction, HMAC pseudonyms"]
+        DB[("DuckDB, read-only,<br/>external access disabled + locked")]
     end
-
-    Scrubber -- "3. Aggregated Metrics + Masked Snippets" --> LLMSynth
+    Vault -- "3. metrics + masked snippets" --> Answer
 ```
 
-### Key Architectural Decisions
+### Key design decisions
 
-* **Unified Single-Engine Storage (DuckDB):** Relational tables, 768-dimensional BGE-Base embeddings (`FLOAT[768]`), HNSW (`vss`), and BM25 full-text (`fts`) indexes run inside one embedded database (`olist.duckdb` / `byoe_audit.duckdb`), eliminating cross-process vector ID synchronization overhead.
-* **Cardinality-Aware Physical Planner:** Before running vector search, a pre-flight `COUNT(*)` probe measures predicate selectivity. Subsets with `<= 5,000` candidates route to **Plan A** (exact SIMD cosine distance scan over SQL-filtered rows for 100% recall); broader queries route to **Plan B** (HNSW + BM25 Reciprocal Rank Fusion hash-joined with SQL tables).
-* **5-Gate `SQLGlot` AST Firewall (`ast_guard.py`):** Parses SQL filters into abstract syntax trees to block DDL/DML statements, multi-statement payloads, denied tables, and unauthorized `Column.table` qualifiers (preventing queries such as `SELECT ... WHERE order_payments.payment_value > 500` under restricted roles), while injecting mandatory Row-Level Security filters.
-* **Pre-SQL Entity Literal Grounding (`literal_grounder.py`):** Grounds conversational phrases to exact database enum values before SQL generation to prevent silent zero-row queries.
+* **One validated filter, used everywhere.** The SQL filter is parsed by the AST guard once; the rewritten `WHERE` clause (aliases expanded, the role's row-level-security predicate appended with correct precedence) is the only filter the probe, both plans and every metric query execute.
+* **Fan-out-safe aggregation.** Each metric runs over the *distinct* set of matching orders and joins only the table it needs, so a filter on `order_items` can never multiply a `SUM` over `order_payments`. A metric that mixes two one-to-many tables is rejected with an actionable error instead of returning an inflated number.
+* **Two metric scopes.** `filter_scope` covers every order matching the SQL filter. `matched_scope` covers only those orders with a review in the top *X%* most similar to the semantic query (default 1%, per-query rank cutoff). Answers like "N customers complained about X" come from `matched_scope`, not from the whole filter.
+* **Measured cost-based planning.** A `COUNT(DISTINCT order_id)` probe picks Plan A (exact) or Plan B (ANN). The 30,000-order switch point is the measured latency crossover on this dataset. Plan B's vector CTE is a plain `ORDER BY distance LIMIT k`, so DuckDB actually uses the HNSW index (verified in tests via `EXPLAIN`). Its candidate pool grows as the filter gets more selective.
+* **Defense in depth.** The DuckDB handle is read-only, with `enable_external_access = false` and `lock_configuration = true`. Even a guard bypass cannot read files, call `getenv`, or re-enable access.
+* **Role fixed by the operator.** `dualquery serve --role seller_restricted` sets the policy for the server's lifetime. The calling model cannot choose or escalate its role, and unknown roles fail at startup.
 
 ---
 
-## MCP Tool Interface
+## MCP tools
 
-`dualquery-mcp` exposes three typed JSON-RPC 2.0 tools over `stdio`, `sse`, and `streamable-http` transports:
-
-| Tool Name | Responsibility | Security & Behavior |
+| Tool | What it does | Safety behavior |
 | :--- | :--- | :--- |
-| `get_governed_catalog(role)` | Returns authorized tables, columns, and metrics | Dynamically omits restricted financial tables for lower-privilege roles |
-| `resolve_entity_literals(terms)` | Maps free-text strings to canonical DB enum values | Hybrid fuzzy trigram (`RapidFuzz`) + embedding matching |
-| `execute_hybrid_query(...)` | Runs AST-validated SQL + semantic retrieval | Computes exact DuckDB OLAP aggregates, returns top-K HMAC-tokenized citations |
+| `get_governed_catalog()` | Tables, columns, relationships and metric hints for the server's role | Restricted tables are omitted for lower-privilege roles |
+| `resolve_entity_literals(terms)` | Maps "Rio de Janeiro" → `RJ`, "cosmetics" → `health_beauty`, "credit card" → `credit_card` | Exact / alias / RapidFuzz tiers, then embedding similarity over category names |
+| `execute_hybrid_query(sql_filter, semantic_query, aggregations, limit, match_top_percent)` | Hybrid retrieval + metrics | AST-validated, RLS-scoped, fan-out-safe metrics; citations PII-scrubbed and HMAC-pseudonymized; DB errors reduced to one line (no SQL or paths) |
+
+Example response (real run, analyst role, filter `customers.customer_state = 'RJ'`, query "product arrived broken and damaged"):
+
+```json
+{
+  "status": "success",
+  "plan_type": "Plan A",
+  "estimated_candidates": 12852,
+  "aggregates": {
+    "filter_scope":  {"orders": 12852, "metrics": {"orders": "12852", "paid": "2144379.69"}},
+    "matched_scope": {"orders": 49,    "metrics": {"orders": "49",    "paid": "14582.00"}}
+  },
+  "citations": [{"order_id": "[ORD_3C1CE516]", "review_snippet": "O produto vei errado nao esta de acordo com a descriçao..."}]
+}
+```
 
 ---
 
-## Live Audit Example (Zero-Setup CSV Mode)
+## Verification & benchmarks
 
-The repository includes a 500-transaction sample dataset (`data/commercial_case_study/`) to run DualQuery's automated Bring-Your-Own-Export (BYOE) financial leakage pipeline with no external database configuration:
+All numbers come from the committed scripts, run on the full Olist dataset (99,441 orders, 40,659 embedded reviews) on an Intel i5-13450HX laptop with an RTX 4050 GPU. Result files are in `benchmarks/`.
+
+| Suite | Result | Command |
+| :--- | :--- | :--- |
+| **Test suite** | **100 passed**. Fixture DuckDB + fake embedder, so CI needs no model download. Covers RLS on both plans, fan-out-safe sums, matched scope, HNSW use via `EXPLAIN`, sandboxing, MCP tools, BYOE, PII vault and the guard. Re-introducing each of the five original engine bugs fails 3–20 tests. | `uv run --extra dev pytest` |
+| **Red-team AST guard** | **30/30 attacks blocked at the expected gate**: DDL/DML, multi-statement, file/network table functions, CTE smuggling, cross-role tables, PII columns, PRAGMA/ATTACH | `uv run python benchmarks/evaluate_security.py` |
+| **Filtered retrieval** (62 golden queries) | Ground truth = exact filtered top-10. ANN-then-filter with a fixed pool of 150 reaches recall@10 of **0.147** at N ≤ 5k, **0.893** at 5k–20k, and **0.988** at N > 30k. Selectivity-sized pools lift 5k–20k to **0.980**. The planner sends everything ≤ 30k to the exact plan (1.0 by construction). | `uv run python benchmarks/evaluate_retrieval.py` |
+| **Optimizer** (62 queries, both plans run) | Chose the faster retrieval plan in **62/62** queries. Retrieval SQL p50: **90 ms** (Plan A, 54 queries) and **74 ms** (Plan B, 8 queries). Full engine turn p50 (embed + probe + retrieval + both metric scopes + PII scrub): **426 ms** and **404 ms**. | `uv run python benchmarks/evaluate_optimizer.py` |
+
+### Known limitations
+
+* **Language mismatch:** `bge-base-en-v1.5` is an English model, but Olist reviews are Portuguese. Nearest-review cosine distances are 0.26–0.49, which is why `matched_scope` uses a per-query rank cutoff instead of a fixed distance. A multilingual 768-d model (e.g. `intfloat/multilingual-e5-base`) is the obvious next step and needs only a re-ingest.
+* **Approximate matched scope:** `matched_scope` takes the global top-X% from the HNSW index, so it inherits HNSW's approximation. Filtered ANN recall@10 for broad filters measured 0.988 above; matched-scope recall is not separately benchmarked.
+* **Hardware-specific threshold:** the 30,000 switch point was measured on the hardware above; re-run `evaluate_optimizer.py` on new hardware.
+
+---
+
+## BYOE financial leakage audit (zero-setup demo)
+
+The repo ships a 500-transaction sample (`data/commercial_case_study/`). `dualquery audit` maps arbitrary CSV headers to a canonical schema, embeds the complaint notes, assigns each note to a root-cause prototype, and attributes money to clusters. A transaction with several notes is counted **once**, in the cluster of its earliest note, so cluster totals add up exactly.
 
 ```text
-> dualquery audit -t data/commercial_case_study/transactions.csv -f data/commercial_case_study/returns_notes.csv
+> uv run dualquery audit -t data/commercial_case_study/transactions.csv -f data/commercial_case_study/returns_notes.csv
 
 Total Ingested Transactions: 500
 Audited Complaint Notes: 160 (32.0% Incident Rate)
 Total Gross Revenue at Risk: $84,272.65
-Total Logistics / Freight Loss: $13,690.48
-Total Financial Leakage: $97,963.13
+Total Logistics / Freight Loss: $13,413.09
+Total Financial Leakage: $97,685.74
 Primary Leakage Driver: Packaging & Transit Damage
 ```
 
----
-
-## Verification & Benchmarks
-
-All quantitative metrics below are backed by committed evaluation scripts and automated test suites:
-
-| Evaluation Suite | Result | Reproducible Command |
-| :--- | :--- | :--- |
-| **Automated Test Suite (`pytest`)** | **33/33 passed** (BYOE pipeline, MCP tool RBAC/execution, security compiler) | `uv run --extra dev pytest -v` |
-| **5-Gate AST Adversarial Security** | **30/30 blocked (100.0%)** across DDL/DML, CTE smuggling & column-qualifier probes | `uv run pytest tests/test_security_compiler.py -v` |
-| **Physical Optimizer Plan Accuracy** | **50/50 matched (100.0%)** (`Plan A`: 315ms P50 / 409ms P95; `Plan B`: 1,003ms P50) | `uv run python benchmarks/evaluate_optimizer.py` |
-
-*(Latency numbers in `benchmarks/optimizer_benchmark_results.json` measure end-to-end local query embedding, cardinality probe, hybrid execution, OLAP aggregation, and PII scrubbing on 99k+ Olist records).*
+Each `audit` / `ingest` run writes a fresh `byoe_audit.duckdb`; a second dataset never mixes with the first.
 
 ---
 
-## Tech Stack & Dependencies
+## Quick start
 
-* **Protocol & Server:** Official Python `mcp` SDK (`MCPServer`, `stdio`, `SSE`, `Streamable HTTP`), JSON-RPC 2.0, Pydantic v2
-* **Storage & Indexing:** DuckDB (`vss` HNSW vector index, `fts` BM25 full-text index), PyArrow, Pandas
-* **Embeddings & Grounding:** FastEmbed (CPU ONNX), SentenceTransformers / PyTorch (`BAAI/bge-base-en-v1.5`), RapidFuzz
-* **Security & CLI:** SQLGlot (SQL AST parsing & rewriting), HMAC-SHA256 tokenization, Rich, Pytest
-
----
-
-## Repository Structure
-
-```text
-dualquery/
-├── src/dualquery/
-│   ├── cli.py                  # Unified CLI (ingest, audit, serve)
-│   ├── config.py               # Runtime paths, embedding model, cardinality limit
-│   ├── engine/                 # Cardinality probe, physical planner, executor, audit runner
-│   ├── ingestion/              # BYOE CSV fuzzy mapper, Olist loader, embedding providers
-│   ├── mcp/                    # Official MCPServer tools and transport handlers
-│   └── security/               # 5-gate SQLGlot AST compiler and local PII vault
-├── benchmarks/                 # 50-query optimizer harness & 30-attack red-team suite
-├── data/commercial_case_study/ # Sample 500-row ERP transaction + return note CSVs
-├── sql/                        # DuckDB DDL and index initialization schema
-└── tests/                      # Unit, BYOE E2E, MCP server, and adversarial security tests
-```
-
----
-
-## Quick Start
-
-### 1. Install Dependencies
+### 1. Install
 
 ```bash
 git clone https://github.com/Zayf24/DualQuery.git
@@ -142,43 +131,73 @@ cd DualQuery
 uv sync --extra dev
 ```
 
-### 2. Run the Commercial Financial Audit Demo
+### 2. Run the audit demo (no external data needed)
 
 ```bash
-uv run dualquery audit \
-  --transactions data/commercial_case_study/transactions.csv \
-  --feedback data/commercial_case_study/returns_notes.csv \
-  --output-json data/commercial_case_study/audit_summary.json
+uv run dualquery audit -t data/commercial_case_study/transactions.csv -f data/commercial_case_study/returns_notes.csv -o data/commercial_case_study/audit_summary.json
 ```
 
-### 3. Start the Zero-Trust MCP Server
+### 3. Build the Olist database for the MCP server
+
+Download the [Olist dataset from Kaggle](https://www.kaggle.com/datasets/olistbr/brazilian-ecommerce) into `data/olist_dataset/`, then:
 
 ```bash
-# Default stdio transport (Claude Desktop / Cursor)
-uv run dualquery serve
-
-# Networked Streamable HTTP or SSE transport
-uv run dualquery serve --transport streamable-http --host 127.0.0.1 --port 8000
-uv run dualquery serve --transport sse --host 127.0.0.1 --port 8000
+uv run dualquery ingest-olist
 ```
 
-#### Client Configuration (`claude_desktop_config.json` / `.cursor/mcp.json`)
+Add `--max-reviews 2000` for a quick partial build. A full build embeds about 40k reviews (fast on a GPU, slower on CPU). To serve a database stored elsewhere, set `DUALQUERY_DB_PATH`.
+
+### 4. Start the MCP server
+
+```bash
+uv run dualquery serve --role analyst
+```
+
+```bash
+uv run dualquery serve --role seller_restricted --transport streamable-http --host 127.0.0.1 --port 8000
+```
+
+Client configuration (`claude_desktop_config.json` / `.cursor/mcp.json`):
 
 ```json
 {
   "mcpServers": {
     "dualquery": {
       "command": "uv",
-      "args": ["--directory", "/path/to/DualQuery", "run", "dualquery-mcp"]
+      "args": ["--directory", "/path/to/DualQuery", "run", "dualquery-mcp", "--role", "analyst"]
     }
   }
 }
 ```
 
-### 4. Run Tests
+### 5. Test and benchmark
 
 ```bash
-uv run --extra dev pytest -v
+uv run --extra dev pytest
+```
+
+```bash
+uv run python benchmarks/evaluate_retrieval.py
+```
+
+---
+
+## Repository structure
+
+```text
+dualquery/
+├── src/dualquery/
+│   ├── cli.py                  # ingest, ingest-olist, audit, serve
+│   ├── config.py               # paths (DUALQUERY_DB_PATH), model, Plan A/B threshold
+│   ├── engine/                 # executor, cardinality probe, physical planner, grounder, audit runner
+│   ├── ingestion/              # BYOE CSV mapper, Olist loader, literal indexer, embedding providers
+│   ├── mcp/                    # MCP server, tools, role selection
+│   └── security/               # 5-gate SQLGlot AST guard, PII vault
+├── benchmarks/                 # golden hybrid queries, retrieval / optimizer / red-team benchmarks + results
+├── scripts/verify_phase1.py    # manual smoke check of a built Olist database
+├── data/commercial_case_study/ # 500-row sample transactions + return notes
+├── sql/                        # DuckDB schema
+└── tests/                      # fixture DB tests: executor, MCP, BYOE, PII vault, guard
 ```
 
 ---

@@ -15,6 +15,16 @@ from dualquery.engine.audit_runner import CommercialAuditRunner
 
 console = Console()
 
+OLIST_FILES = [
+    "olist_customers_dataset.csv",
+    "olist_orders_dataset.csv",
+    "olist_order_items_dataset.csv",
+    "olist_order_payments_dataset.csv",
+    "olist_order_reviews_dataset.csv",
+    "olist_products_dataset.csv",
+    "product_category_name_translation.csv",
+]
+
 
 def handle_ingest(args: argparse.Namespace) -> None:
     """Handle 'dualquery ingest' command."""
@@ -38,6 +48,23 @@ def handle_ingest(args: argparse.Namespace) -> None:
     console.print(f"  • Feedback notes ingested & embedded: {report.feedback_notes_ingested:,}")
     console.print(f"  • Mapped Transaction Columns: {report.column_mappings['transactions']}")
     console.print(f"  • Mapped Feedback Columns: {report.column_mappings['feedback']}")
+
+
+def handle_ingest_olist(args: argparse.Namespace) -> None:
+    """Handle 'dualquery ingest-olist': build the Olist DuckDB the MCP server queries."""
+    from dualquery.ingestion.olist_loader import OlistLoader
+    from dualquery.ingestion.literal_indexer import LiteralIndexer
+
+    data_dir = Path(args.data_dir)
+    db_path = Path(args.db) if args.db else settings.DUCKDB_PATH
+    missing = [f for f in OLIST_FILES if not (data_dir / f).exists()]
+    if missing:
+        console.print(f"[bold red]Error:[/bold red] Missing Olist CSVs in {data_dir}: {missing}")
+        console.print("Download them from https://www.kaggle.com/datasets/olistbr/brazilian-ecommerce")
+        sys.exit(1)
+
+    OlistLoader(db_path=db_path, data_dir=data_dir).run(max_reviews=args.max_reviews)
+    LiteralIndexer(db_path=db_path).build_index()
 
 
 def handle_audit(args: argparse.Namespace) -> None:
@@ -71,7 +98,7 @@ def handle_audit(args: argparse.Namespace) -> None:
 def handle_serve(args: argparse.Namespace) -> None:
     """Handle 'dualquery serve' command."""
     from dualquery.mcp.server import run_server
-    run_server(transport=args.transport, host=args.host, port=args.port)
+    run_server(transport=args.transport, host=args.host, port=args.port, role=args.role)
 
 
 def main() -> None:
@@ -88,6 +115,13 @@ def main() -> None:
     ingest_parser.add_argument("-f", "--feedback", required=True, help="Path to return notes / feedback CSV")
     ingest_parser.add_argument("--db", default=None, help="Custom DuckDB database path")
     ingest_parser.set_defaults(func=handle_ingest)
+
+    # Olist ingest command (builds the database behind the MCP server)
+    olist_parser = subparsers.add_parser("ingest-olist", help="Build olist.duckdb (tables, embeddings, HNSW + BM25) for the MCP server")
+    olist_parser.add_argument("--data-dir", default=str(settings.DATA_DIR / "olist_dataset"), help="Folder with the Kaggle Olist CSVs")
+    olist_parser.add_argument("--db", default=None, help="Output DuckDB path (default: data/olist.duckdb or DUALQUERY_DB_PATH)")
+    olist_parser.add_argument("--max-reviews", type=int, default=None, help="Load only the first N reviews (quick demo build)")
+    olist_parser.set_defaults(func=handle_ingest_olist)
 
     # Audit command
     audit_parser = subparsers.add_parser("audit", help="Run commercial financial leakage audit")
@@ -108,6 +142,12 @@ def main() -> None:
     )
     serve_parser.add_argument("--host", default="127.0.0.1", help="Bind host for SSE/HTTP transports")
     serve_parser.add_argument("--port", type=int, default=8000, help="Bind port for SSE/HTTP transports")
+    serve_parser.add_argument(
+        "--role",
+        choices=["analyst", "seller_restricted", "support_agent"],
+        default="analyst",
+        help="Security role applied to every tool call (fixed for the server's lifetime)",
+    )
     serve_parser.set_defaults(func=handle_serve)
 
     args = parser.parse_args()

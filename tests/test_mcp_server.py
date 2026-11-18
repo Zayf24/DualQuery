@@ -1,121 +1,107 @@
 """
-Test suite for DualQuery MCP Server tools.
-Verifies tool discovery, role RBAC catalog, literal grounding, hybrid execution, and security gating.
+MCP server tests: tool discovery, server-fixed role (RBAC), literal grounding, labeled
+filter/matched metrics, and error shaping. Runs against the tiny fixture database.
 """
 
-import asyncio
 import pytest
-from rich.console import Console
-from dualquery.mcp.server import mcp_server
 
-console = Console()
+import dualquery.mcp.server as server
+from dualquery.engine.executor import HybridExecutor
+from dualquery.security.ast_guard import ANALYST_POLICY, SUPPORT_AGENT_POLICY
 
 
-async def run_tests():
-    console.print("[bold cyan]=== DualQuery MCP Server Verification Suite ===[/bold cyan]\n")
+@pytest.fixture
+def mcp(tiny_db, fake_embedder, monkeypatch):
+    monkeypatch.setattr(server, "_executor", HybridExecutor(db_path=tiny_db, embedder=fake_embedder))
+    monkeypatch.setattr(server, "_grounder", None)
+    monkeypatch.setattr(server, "ACTIVE_POLICY", ANALYST_POLICY)
+    return server.mcp_server
 
-    # 1. List registered tools
-    tools = await mcp_server.list_tools()
-    tool_names = [t.name for t in tools]
-    console.print(f"[bold green][OK][/bold green] Registered Tools: {tool_names}")
-    assert "get_governed_catalog" in tool_names
-    assert "resolve_entity_literals" in tool_names
-    assert "execute_hybrid_query" in tool_names
 
-    # 2. Test get_governed_catalog RBAC
-    console.print("\n[bold yellow]Testing Tool 1: get_governed_catalog (Role RBAC)...[/bold yellow]")
-    analyst_cat = await mcp_server.call_tool("get_governed_catalog", {"role": "analyst"})
-    support_cat = await mcp_server.call_tool("get_governed_catalog", {"role": "support_agent"})
-
-    analyst_tables = list(analyst_cat.structured_content["result"]["authorized_tables"].keys())
-    support_tables = list(support_cat.structured_content["result"]["authorized_tables"].keys())
-    console.print(f"Analyst tables ({len(analyst_tables)}): {analyst_tables}")
-    console.print(f"Support Agent tables ({len(support_tables)}): {support_tables}")
-    assert "order_payments" in analyst_tables
-    assert "order_payments" not in support_tables
-    console.print("[bold green][OK][/bold green] Role-governed catalog filtering verified!")
-
-    # 3. Test resolve_entity_literals
-    console.print("\n[bold yellow]Testing Tool 2: resolve_entity_literals...[/bold yellow]")
-    ground_res = await mcp_server.call_tool(
-        "resolve_entity_literals",
-        {"terms": ["Rio de Janeiro", "credit card", "relogios"]}
-    )
-    entities = ground_res.structured_content["result"]["entities"]
-    for term, data in entities.items():
-        console.print(f" - '{term}' -> [bold green]{data['grounded_value']}[/bold green] ({data['domain']}, conf: {data['confidence']})")
-    assert entities["Rio de Janeiro"]["grounded_value"] == "RJ"
-    assert entities["credit card"]["grounded_value"] == "credit_card"
-    console.print("[bold green][OK][/bold green] Entity literal grounding verified!")
-
-    # 4. Test execute_hybrid_query (Valid execution)
-    console.print("\n[bold yellow]Testing Tool 3: execute_hybrid_query (Compound Query & PII Redaction)...[/bold yellow]")
-    q_res = await mcp_server.call_tool(
-        "execute_hybrid_query",
-        {
-            "sql_filter": "customers.customer_state = 'RJ' AND order_payments.payment_type = 'credit_card' AND order_payments.payment_value > 300",
-            "semantic_query": "produto quebrado danificado embalagem veio em pedacos",
-            "limit": 2,
-            "role": "analyst"
-        }
-    )
-    res_data = q_res.structured_content["result"]
-    console.print(f"Status: [bold green]{res_data['status']}[/bold green]")
-    console.print(f"Plan Chosen: [cyan]{res_data['plan_type']}[/cyan] (Candidates: {res_data['estimated_candidates']})")
-    console.print(f"Aggregates: {res_data['aggregates']}")
-    console.print(f"Telemetry: {res_data['telemetry']}")
-    console.print(f"Citations: {res_data['citations_returned']} returned")
-    for c in res_data["citations"]:
-        console.print(f" - Citation #{c['citation_rank']}: Order {c['order_id']} | Score: {c['review_score']} | Snippet: {c['review_snippet'][:70]}...")
-    assert res_data["status"] == "success"
-    assert len(res_data["citations"]) > 0
-    assert "[ORD_" in res_data["citations"][0]["order_id"]
-    console.print("[bold green][OK][/bold green] Hybrid query executed with HMAC tokenization and PII scrubbing!")
-
-    # 5. Test execute_hybrid_query (Malicious attack blocked)
-    console.print("\n[bold yellow]Testing Security Attack over MCP (Chained DROP TABLE)...[/bold yellow]")
-    sec_res = await mcp_server.call_tool(
-        "execute_hybrid_query",
-        {
-            "sql_filter": "1=1; DROP TABLE customers;",
-            "semantic_query": "broken box",
-            "role": "analyst"
-        }
-    )
-    sec_data = sec_res.structured_content["result"]
-    console.print(f"Status: [bold red]{sec_data['status']}[/bold red]")
-    console.print(f"Gate: {sec_data.get('gate')} ({sec_data.get('violation_type')})")
-    console.print(f"Message: {sec_data.get('message')}")
-    assert sec_data["status"] == "security_violation"
-    assert sec_data["gate"] == 1
-    console.print("[bold green][OK][/bold green] Malicious SQL blocked by Gate 1 over MCP!")
-
-    # 6. Test execute_hybrid_query (Role RBAC boundary blocked)
-    console.print("\n[bold yellow]Testing Role Boundary Violation over MCP...[/bold yellow]")
-    role_sec_res = await mcp_server.call_tool(
-        "execute_hybrid_query",
-        {
-            "sql_filter": "order_payments.payment_value > 500",
-            "semantic_query": "expensive fee",
-            "role": "support_agent"
-        }
-    )
-    role_sec_data = role_sec_res.structured_content["result"]
-    console.print(f"Status: [bold red]{role_sec_data['status']}[/bold red]")
-    console.print(f"Gate: {role_sec_data.get('gate')} ({role_sec_data.get('violation_type')})")
-    console.print(f"Message: {role_sec_data.get('message')}")
-    assert role_sec_data["status"] == "security_violation"
-    assert role_sec_data["gate"] == 3
-    console.print("[bold green][OK][/bold green] Cross-role privilege escalation blocked by Gate 3 over MCP!")
-
-    console.print("\n[bold green]ALL 6 MCP SERVER VERIFICATION TESTS PASSED SUCCESSFULLY![/bold green]")
+async def call(mcp, tool, args):
+    res = await mcp.call_tool(tool, args)
+    return res.structured_content["result"]
 
 
 @pytest.mark.asyncio
-async def test_mcp_server_full_suite():
-    await run_tests()
+async def test_tools_are_registered_without_a_role_argument(mcp):
+    tools = {t.name: t for t in await mcp.list_tools()}
+    assert set(tools) == {"get_governed_catalog", "resolve_entity_literals", "execute_hybrid_query"}
+    for tool in tools.values():
+        assert "role" not in tool.input_schema.get("properties", {})
 
 
-if __name__ == "__main__":
-    asyncio.run(run_tests())
+@pytest.mark.asyncio
+async def test_catalog_follows_server_role(mcp, monkeypatch):
+    assert "order_payments" in (await call(mcp, "get_governed_catalog", {}))["authorized_tables"]
+    monkeypatch.setattr(server, "ACTIVE_POLICY", SUPPORT_AGENT_POLICY)
+    catalog = await call(mcp, "get_governed_catalog", {})
+    assert catalog["role"] == "support_agent" and "order_payments" not in catalog["authorized_tables"]
 
+
+def test_unknown_role_is_rejected_at_startup():
+    with pytest.raises(ValueError, match="Unknown role"):
+        server.run_server(role="admin")
+
+
+@pytest.mark.asyncio
+async def test_literal_grounding(mcp):
+    res = await call(mcp, "resolve_entity_literals", {"terms": ["Rio de Janeiro", "credit card", "zzzz-unknown"]})
+    assert res["entities"]["Rio de Janeiro"]["grounded_value"] == "RJ"
+    assert res["entities"]["credit card"]["grounded_value"] == "credit_card"
+    assert res["entities"]["zzzz-unknown"]["grounded_value"] is None
+    assert res["grounded_count"] == 2
+
+
+@pytest.mark.asyncio
+async def test_execute_returns_labeled_scopes_and_tokenized_citations(mcp):
+    res = await call(mcp, "execute_hybrid_query", {
+        "sql_filter": "1=1", "semantic_query": "broken", "match_top_percent": 50,
+        "aggregations": ["COUNT(*) AS n", "SUM(order_payments.payment_value) AS paid"],
+    })
+    assert res["status"] == "success"
+    assert res["aggregates"]["filter_scope"] == {
+        "description": "Every order matching sql_filter", "orders": 4, "metrics": {"n": "4", "paid": "185.00"}}
+    assert res["aggregates"]["matched_scope"]["orders"] == 2
+    assert res["aggregates"]["matched_scope"]["metrics"] == {"n": "2", "paid": "35.00"}
+    assert res["citations"] and all(c["order_id"].startswith("[ORD_") for c in res["citations"])
+    assert res["security_governance"]["active_role"] == "analyst"
+
+
+@pytest.mark.asyncio
+async def test_limit_is_capped_at_10(mcp):
+    res = await call(mcp, "execute_hybrid_query", {"semantic_query": "broken", "limit": 500})
+    assert res["status"] == "success" and res["citations_returned"] <= 10
+
+
+@pytest.mark.asyncio
+async def test_empty_semantic_query_is_rejected(mcp):
+    res = await call(mcp, "execute_hybrid_query", {"semantic_query": "  "})
+    assert res["status"] == "error" and res["error_type"] == "INVALID_ARGUMENT"
+
+
+@pytest.mark.asyncio
+async def test_chained_drop_is_blocked_at_gate_1(mcp):
+    res = await call(mcp, "execute_hybrid_query", {"sql_filter": "1=1; DROP TABLE customers;", "semantic_query": "broken"})
+    assert res["status"] == "security_violation" and res["gate"] == 1
+
+
+@pytest.mark.asyncio
+async def test_support_agent_cannot_reach_payments(mcp, monkeypatch):
+    monkeypatch.setattr(server, "ACTIVE_POLICY", SUPPORT_AGENT_POLICY)
+    res = await call(mcp, "execute_hybrid_query", {"sql_filter": "order_payments.payment_value > 500", "semantic_query": "fee"})
+    assert res["status"] == "security_violation" and res["gate"] == 3
+
+
+@pytest.mark.asyncio
+async def test_double_counting_metric_returns_actionable_error(mcp):
+    res = await call(mcp, "execute_hybrid_query", {
+        "semantic_query": "broken", "aggregations": ["SUM(order_payments.payment_value) + SUM(order_items.price)"]})
+    assert res["status"] == "execution_error" and "double counts" in res["message"]
+
+
+@pytest.mark.asyncio
+async def test_database_errors_do_not_leak_sql(mcp):
+    res = await call(mcp, "execute_hybrid_query", {"semantic_query": "broken", "aggregations": ["SUM(orders.nope)"]})
+    assert res["status"] == "execution_error" and res["error_type"] == "BinderException"
+    assert "\n" not in res["message"] and len(res["message"]) <= 200

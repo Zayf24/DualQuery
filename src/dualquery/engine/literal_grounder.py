@@ -221,12 +221,3 @@ class LiteralGrounder:
             )
 
         return None
-
-    def resolve_terms(self, terms: List[str]) -> Dict[str, GroundedLiteral]:
-        """Resolve a batch of terms and return a mapped dictionary."""
-        grounded = {}
-        for t in terms:
-            res = self.resolve_term(t)
-            if res:
-                grounded[t] = res
-        return grounded

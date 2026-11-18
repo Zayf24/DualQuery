@@ -95,7 +95,8 @@ SELLER_RESTRICTED_POLICY = SecurityPolicy(
     role_name="seller_restricted",
     # Sellers cannot access payment ledgers or global customer data directly
     allowed_tables={"orders", "order_items", "products", "order_reviews"},
-    rls_predicate="order_items.seller_id = 'seller_active'",
+    # Demo tenant: the busiest Olist seller (1,854 orders). Each seller deployment sets its own id.
+    rls_predicate="order_items.seller_id = '6560211a19b47992c3666cc44a7e94c0'",
     max_limit=500
 )
 
@@ -143,6 +144,8 @@ class ASTGuard:
         "arrow_scan",
         "duckdb_settings",
         "duckdb_secrets",
+        "getenv",
+        "current_setting",
     }
 
     def __init__(self, default_policy: Optional[SecurityPolicy] = None):

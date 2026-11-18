@@ -1,396 +1,407 @@
 {
-  "accuracy_percent": 100.0,
-  "plan_a": {
-    "p50_ms": 315.19,
-    "p95_ms": 408.719,
-    "sample_count": 39
-  },
-  "plan_b": {
-    "p50_ms": 1002.71,
-    "p95_ms": 1072.5,
-    "sample_count": 11
+  "summary": {
+    "Plan A": {
+      "queries": 54,
+      "total_p50_ms": 426.2,
+      "total_p95_ms": 461.8,
+      "retrieval_p50_ms": 89.8,
+      "retrieval_p95_ms": 109.4,
+      "other_plan_retrieval_p50_ms": 510.3,
+      "chose_faster_retrieval": 54,
+      "full_citations": 53
+    },
+    "Plan B": {
+      "queries": 8,
+      "total_p50_ms": 404.2,
+      "total_p95_ms": 422.7,
+      "retrieval_p50_ms": 74.0,
+      "retrieval_p95_ms": 89.7,
+      "other_plan_retrieval_p50_ms": 343.7,
+      "chose_faster_retrieval": 8,
+      "full_citations": 8
+    }
   },
   "queries": [
     {
       "id": "HQ_01",
-      "description": "High Selectivity: Specific state, payment, and high value with damage complaint",
       "candidates": 1074,
-      "expected_plan": "Plan A",
       "chosen_plan": "Plan A",
-      "plan_matched": true,
-      "opt_latency_ms": 643.16,
-      "alt_latency_ms": 917.17,
-      "opt_citations_count": 5,
-      "alt_citations_count": 5,
+      "chosen_total_ms": 461.3,
+      "chosen_retrieval_ms": 107.0,
+      "other_total_ms": 865.78,
+      "other_retrieval_ms": 523.5,
+      "chose_faster_retrieval": true,
+      "citations": 5,
+      "matched_orders": 9,
       "aggregates": {
-        "count_star()": "1078",
-        "sum(order_payments.payment_value)": "648784.53"
+        "count_star()": "1074",
+        "sum(order_payments.payment_value)": "651154.98"
       }
     },
     {
       "id": "HQ_02",
-      "description": "High Selectivity: Specific product category (health_beauty) with severe delay and counterfeit complaint",
       "candidates": 196,
-      "expected_plan": "Plan A",
       "chosen_plan": "Plan A",
-      "plan_matched": true,
-      "opt_latency_ms": 313.37,
-      "alt_latency_ms": 879.57,
-      "opt_citations_count": 5,
-      "alt_citations_count": 0,
+      "chosen_total_ms": 413.95,
+      "chosen_retrieval_ms": 78.48,
+      "other_total_ms": 845.63,
+      "other_retrieval_ms": 502.24,
+      "chose_faster_retrieval": true,
+      "citations": 5,
+      "matched_orders": 0,
       "aggregates": {
-        "count_star()": "210",
-        "avg(orders.delivery_delay_days)": "21.83809523809524"
+        "count_star()": "196",
+        "avg(orders.delivery_delay_days)": "21.642857142857142"
       }
     },
     {
       "id": "HQ_03",
-      "description": "Low Selectivity (Plan B): Broad delivered orders with missing parts complaint",
       "candidates": 96478,
-      "expected_plan": "Plan B",
       "chosen_plan": "Plan B",
-      "plan_matched": true,
-      "opt_latency_ms": 806.5,
-      "alt_latency_ms": 643.7,
-      "opt_citations_count": 5,
-      "alt_citations_count": 5,
+      "chosen_total_ms": 403.52,
+      "chosen_retrieval_ms": 73.67,
+      "other_total_ms": 778.55,
+      "other_retrieval_ms": 445.95,
+      "chose_faster_retrieval": true,
+      "citations": 5,
+      "matched_orders": 396,
       "aggregates": {
-        "count_star()": "95598",
+        "count_star()": "96478",
         "avg(order_reviews.review_score)": "4.157953095253038"
       }
     },
     {
       "id": "HQ_04",
-      "description": "High Selectivity: Voucher payments with 1-star reviews about delivery non-arrival",
       "candidates": 5,
-      "expected_plan": "Plan A",
       "chosen_plan": "Plan A",
-      "plan_matched": true,
-      "opt_latency_ms": 248.09,
-      "alt_latency_ms": 914.86,
-      "opt_citations_count": 4,
-      "alt_citations_count": 0,
+      "chosen_total_ms": 444.79,
+      "chosen_retrieval_ms": 66.09,
+      "other_total_ms": 844.01,
+      "other_retrieval_ms": 500.82,
+      "chose_faster_retrieval": true,
+      "citations": 4,
+      "matched_orders": 0,
       "aggregates": {
         "count_star()": "5",
-        "sum(order_payments.payment_value)": "170.81"
+        "sum(order_payments.payment_value)": "219.47"
       }
     },
     {
       "id": "HQ_05",
-      "description": "Low Selectivity (Plan B): All orders with rude courier remarks",
       "candidates": 99441,
-      "expected_plan": "Plan B",
       "chosen_plan": "Plan B",
-      "plan_matched": true,
-      "opt_latency_ms": 874.83,
-      "alt_latency_ms": 569.91,
-      "opt_citations_count": 5,
-      "alt_citations_count": 5,
+      "chosen_total_ms": 403.53,
+      "chosen_retrieval_ms": 74.25,
+      "other_total_ms": 632.65,
+      "other_retrieval_ms": 322.27,
+      "chose_faster_retrieval": true,
+      "citations": 5,
+      "matched_orders": 407,
       "aggregates": {
-        "count_star()": "98410",
+        "count_star()": "99441",
         "avg(order_reviews.review_score)": "4.088801951021238"
       }
     },
     {
       "id": "HQ_06",
-      "description": "High Selectivity: High installment credit card orders on computers_accessories with defective functionality",
       "candidates": 435,
-      "expected_plan": "Plan A",
       "chosen_plan": "Plan A",
-      "plan_matched": true,
-      "opt_latency_ms": 324.6,
-      "alt_latency_ms": 873.88,
-      "opt_citations_count": 5,
-      "alt_citations_count": 0,
+      "chosen_total_ms": 395.71,
+      "chosen_retrieval_ms": 81.76,
+      "other_total_ms": 847.4,
+      "other_retrieval_ms": 519.24,
+      "chose_faster_retrieval": true,
+      "citations": 5,
+      "matched_orders": 1,
       "aggregates": {
-        "count_star()": "558",
-        "sum(order_payments.payment_value)": "213078.35",
-        "avg(order_reviews.review_score)": "3.8960573476702507"
+        "count_star()": "435",
+        "sum(order_payments.payment_value)": "153674.14",
+        "avg(order_reviews.review_score)": "3.995402298850575"
       }
     },
     {
       "id": "HQ_07",
-      "description": "High Selectivity: Extreme freight cost orders where customer complained freight was too expensive or wasted",
       "candidates": 4236,
-      "expected_plan": "Plan A",
       "chosen_plan": "Plan A",
-      "plan_matched": true,
-      "opt_latency_ms": 258.03,
-      "alt_latency_ms": 806.67,
-      "opt_citations_count": 5,
-      "alt_citations_count": 3,
+      "chosen_total_ms": 418.33,
+      "chosen_retrieval_ms": 78.19,
+      "other_total_ms": 836.79,
+      "other_retrieval_ms": 505.56,
+      "chose_faster_retrieval": true,
+      "citations": 5,
+      "matched_orders": 26,
       "aggregates": {
-        "count_star()": "4605",
-        "avg(order_items.freight_value)": "76.71148317046689"
+        "count_star()": "4236",
+        "avg(order_items.freight_value)": "74.2565038614068"
       }
     },
     {
       "id": "HQ_08",
-      "description": "Low Selectivity (Plan B): Delivered orders praising ultra-fast delivery",
       "candidates": 96478,
-      "expected_plan": "Plan B",
       "chosen_plan": "Plan B",
-      "plan_matched": true,
-      "opt_latency_ms": 805.24,
-      "alt_latency_ms": 605.1,
-      "opt_citations_count": 5,
-      "alt_citations_count": 5,
+      "chosen_total_ms": 386.41,
+      "chosen_retrieval_ms": 63.49,
+      "other_total_ms": 692.67,
+      "other_retrieval_ms": 359.78,
+      "chose_faster_retrieval": true,
+      "citations": 5,
+      "matched_orders": 406,
       "aggregates": {
-        "count_star()": "95598",
+        "count_star()": "96478",
         "avg(order_reviews.review_score)": "4.157953095253038"
       }
     },
     {
       "id": "HQ_09",
-      "description": "High Selectivity: Canceled orders with customer refund demand complaints",
       "candidates": 444,
-      "expected_plan": "Plan A",
       "chosen_plan": "Plan A",
-      "plan_matched": true,
-      "opt_latency_ms": 289.22,
-      "alt_latency_ms": 907.81,
-      "opt_citations_count": 5,
-      "alt_citations_count": 4,
+      "chosen_total_ms": 416.78,
+      "chosen_retrieval_ms": 87.36,
+      "other_total_ms": 843.91,
+      "other_retrieval_ms": 514.66,
+      "chose_faster_retrieval": true,
+      "citations": 5,
+      "matched_orders": 21,
       "aggregates": {
         "count_star()": "444",
-        "sum(order_payments.payment_value)": "97375.31"
+        "sum(order_payments.payment_value)": "99921.19"
       }
     },
     {
       "id": "HQ_10",
-      "description": "High Selectivity: Watches & Gifts in S\u00e3o Paulo with wrong color or wrong model sent",
       "candidates": 2135,
-      "expected_plan": "Plan A",
       "chosen_plan": "Plan A",
-      "plan_matched": true,
-      "opt_latency_ms": 378.57,
-      "alt_latency_ms": 982.8,
-      "opt_citations_count": 5,
-      "alt_citations_count": 3,
+      "chosen_total_ms": 454.87,
+      "chosen_retrieval_ms": 102.02,
+      "other_total_ms": 874.59,
+      "other_retrieval_ms": 513.63,
+      "chose_faster_retrieval": true,
+      "citations": 5,
+      "matched_orders": 11,
       "aggregates": {
-        "count_star()": "2264",
-        "avg(order_reviews.review_score)": "4.126766784452297"
+        "count_star()": "2135",
+        "avg(order_reviews.review_score)": "4.158415841584159"
       }
     },
     {
       "id": "HQ_11",
-      "description": "Plan A: Telephony in Rio de Janeiro with battery or screen complaints",
       "candidates": 407,
-      "expected_plan": "Plan A",
       "chosen_plan": "Plan A",
-      "plan_matched": true,
-      "opt_latency_ms": 366.2,
-      "alt_latency_ms": 869.07,
-      "opt_citations_count": 5,
-      "alt_citations_count": 3,
+      "chosen_total_ms": 415.53,
+      "chosen_retrieval_ms": 74.78,
+      "other_total_ms": 860.67,
+      "other_retrieval_ms": 520.47,
+      "chose_faster_retrieval": true,
+      "citations": 5,
+      "matched_orders": 8,
       "aggregates": {
-        "count_star()": "438",
-        "avg(orders.delivery_delay_days)": "-12.665871121718377"
+        "count_star()": "407",
+        "avg(orders.delivery_delay_days)": "-12.391752577319588"
       }
     },
     {
       "id": "HQ_12",
-      "description": "Plan A: Expensive electronics with warranty or non-functional complaints",
       "candidates": 36,
-      "expected_plan": "Plan A",
       "chosen_plan": "Plan A",
-      "plan_matched": true,
-      "opt_latency_ms": 282.74,
-      "alt_latency_ms": 873.39,
-      "opt_citations_count": 5,
-      "alt_citations_count": 0,
+      "chosen_total_ms": 406.4,
+      "chosen_retrieval_ms": 77.28,
+      "other_total_ms": 843.68,
+      "other_retrieval_ms": 513.01,
+      "chose_faster_retrieval": true,
+      "citations": 5,
+      "matched_orders": 0,
       "aggregates": {
-        "count_star()": "65",
-        "sum(order_payments.payment_value)": "58938.35"
+        "count_star()": "36",
+        "sum(order_payments.payment_value)": "35105.74"
       }
     },
     {
       "id": "HQ_13",
-      "description": "Plan A: Audio devices in Minas Gerais with buzzing or low sound quality",
       "candidates": 33,
-      "expected_plan": "Plan A",
       "chosen_plan": "Plan A",
-      "plan_matched": true,
-      "opt_latency_ms": 347.93,
-      "alt_latency_ms": 981.83,
-      "opt_citations_count": 5,
-      "alt_citations_count": 0,
+      "chosen_total_ms": 424.75,
+      "chosen_retrieval_ms": 92.07,
+      "other_total_ms": 836.16,
+      "other_retrieval_ms": 508.38,
+      "chose_faster_retrieval": true,
+      "citations": 5,
+      "matched_orders": 0,
       "aggregates": {
-        "count_star()": "35",
-        "avg(order_reviews.review_score)": "3.857142857142857"
+        "count_star()": "33",
+        "avg(order_reviews.review_score)": "3.8181818181818183"
       }
     },
     {
       "id": "HQ_14",
-      "description": "Plan A: Furniture delivered late by more than 15 days in Sao Paulo",
       "candidates": 15,
-      "expected_plan": "Plan A",
       "chosen_plan": "Plan A",
-      "plan_matched": true,
-      "opt_latency_ms": 306.23,
-      "alt_latency_ms": 836.21,
-      "opt_citations_count": 5,
-      "alt_citations_count": 0,
+      "chosen_total_ms": 423.62,
+      "chosen_retrieval_ms": 68.63,
+      "other_total_ms": 851.61,
+      "other_retrieval_ms": 499.84,
+      "chose_faster_retrieval": true,
+      "citations": 5,
+      "matched_orders": 0,
       "aggregates": {
-        "count_star()": "16",
-        "avg(orders.delivery_delay_days)": "43.3125"
+        "count_star()": "15",
+        "avg(orders.delivery_delay_days)": "44.13333333333333"
       }
     },
     {
       "id": "HQ_15",
-      "description": "Plan A: Bed, bath & table orders with torn or dirty fabric remarks",
       "candidates": 402,
-      "expected_plan": "Plan A",
       "chosen_plan": "Plan A",
-      "plan_matched": true,
-      "opt_latency_ms": 332.66,
-      "alt_latency_ms": 849.93,
-      "opt_citations_count": 5,
-      "alt_citations_count": 0,
+      "chosen_total_ms": 442.34,
+      "chosen_retrieval_ms": 94.17,
+      "other_total_ms": 854.27,
+      "other_retrieval_ms": 514.53,
+      "chose_faster_retrieval": true,
+      "citations": 5,
+      "matched_orders": 1,
       "aggregates": {
-        "count_star()": "464",
-        "avg(order_reviews.review_score)": "3.8879310344827585"
+        "count_star()": "402",
+        "avg(order_reviews.review_score)": "3.9824120603015074"
       }
     },
     {
       "id": "HQ_16",
-      "description": "Plan A: Housewares with glass breakage in Santa Catarina",
       "candidates": 224,
-      "expected_plan": "Plan A",
       "chosen_plan": "Plan A",
-      "plan_matched": true,
-      "opt_latency_ms": 323.49,
-      "alt_latency_ms": 832.17,
-      "opt_citations_count": 5,
-      "alt_citations_count": 0,
+      "chosen_total_ms": 437.87,
+      "chosen_retrieval_ms": 93.33,
+      "other_total_ms": 869.77,
+      "other_retrieval_ms": 531.04,
+      "chose_faster_retrieval": true,
+      "citations": 5,
+      "matched_orders": 2,
       "aggregates": {
-        "count_star()": "269",
-        "sum(order_payments.payment_value)": "43082.41"
+        "count_star()": "224",
+        "sum(order_payments.payment_value)": "33854.72"
       }
     },
     {
       "id": "HQ_17",
-      "description": "Plan A: Fashion bags and accessories with broken zippers",
       "candidates": 77,
-      "expected_plan": "Plan A",
       "chosen_plan": "Plan A",
-      "plan_matched": true,
-      "opt_latency_ms": 318.59,
-      "alt_latency_ms": 1019.8,
-      "opt_citations_count": 5,
-      "alt_citations_count": 0,
+      "chosen_total_ms": 424.75,
+      "chosen_retrieval_ms": 77.34,
+      "other_total_ms": 850.51,
+      "other_retrieval_ms": 505.57,
+      "chose_faster_retrieval": true,
+      "citations": 5,
+      "matched_orders": 1,
       "aggregates": {
-        "count_star()": "81",
-        "avg(order_reviews.review_score)": "4.271604938271605"
+        "count_star()": "77",
+        "avg(order_reviews.review_score)": "4.3076923076923075"
       }
     },
     {
       "id": "HQ_18",
-      "description": "Plan A: Watches & gifts over R$1000 with fake or stopped movement",
       "candidates": 108,
-      "expected_plan": "Plan A",
       "chosen_plan": "Plan A",
-      "plan_matched": true,
-      "opt_latency_ms": 323.74,
-      "alt_latency_ms": 1008.74,
-      "opt_citations_count": 5,
-      "alt_citations_count": 3,
+      "chosen_total_ms": 428.9,
+      "chosen_retrieval_ms": 97.08,
+      "other_total_ms": 828.93,
+      "other_retrieval_ms": 498.23,
+      "chose_faster_retrieval": true,
+      "citations": 5,
+      "matched_orders": 3,
       "aggregates": {
-        "count_star()": "126",
-        "sum(order_payments.payment_value)": "195857.33"
+        "count_star()": "108",
+        "sum(order_payments.payment_value)": "167741.11"
       }
     },
     {
       "id": "HQ_19",
-      "description": "Plan A: Sports and leisure equipment delivered with missing components in Bahia",
       "candidates": 257,
-      "expected_plan": "Plan A",
       "chosen_plan": "Plan A",
-      "plan_matched": true,
-      "opt_latency_ms": 360.18,
-      "alt_latency_ms": 985.09,
-      "opt_citations_count": 5,
-      "alt_citations_count": 0,
+      "chosen_total_ms": 422.16,
+      "chosen_retrieval_ms": 74.82,
+      "other_total_ms": 877.91,
+      "other_retrieval_ms": 528.85,
+      "chose_faster_retrieval": true,
+      "citations": 5,
+      "matched_orders": 2,
       "aggregates": {
-        "count_star()": "290",
-        "avg(order_reviews.review_score)": "3.8344827586206898"
+        "count_star()": "257",
+        "avg(order_reviews.review_score)": "3.921259842519685"
       }
     },
     {
       "id": "HQ_20",
-      "description": "Plan A: Toys with missing assembly instructions or broken plastic",
       "candidates": 1612,
-      "expected_plan": "Plan A",
       "chosen_plan": "Plan A",
-      "plan_matched": true,
-      "opt_latency_ms": 336.3,
-      "alt_latency_ms": 941.82,
-      "opt_citations_count": 5,
-      "alt_citations_count": 5,
+      "chosen_total_ms": 437.64,
+      "chosen_retrieval_ms": 95.37,
+      "other_total_ms": 847.78,
+      "other_retrieval_ms": 500.94,
+      "chose_faster_retrieval": true,
+      "citations": 5,
+      "matched_orders": 16,
       "aggregates": {
-        "count_star()": "1697",
-        "avg(order_reviews.review_score)": "4.199764289923394"
+        "count_star()": "1612",
+        "avg(order_reviews.review_score)": "4.235441452723857"
       }
     },
     {
       "id": "HQ_21",
-      "description": "Plan A: Baby products with safety or chemical smell complaints",
       "candidates": 946,
-      "expected_plan": "Plan A",
       "chosen_plan": "Plan A",
-      "plan_matched": true,
-      "opt_latency_ms": 349.52,
-      "alt_latency_ms": 884.63,
-      "opt_citations_count": 5,
-      "alt_citations_count": 2,
+      "chosen_total_ms": 429.15,
+      "chosen_retrieval_ms": 92.75,
+      "other_total_ms": 843.9,
+      "other_retrieval_ms": 508.41,
+      "chose_faster_retrieval": true,
+      "citations": 5,
+      "matched_orders": 4,
       "aggregates": {
-        "count_star()": "1045",
-        "avg(order_reviews.review_score)": "3.7100478468899523"
+        "count_star()": "946",
+        "avg(order_reviews.review_score)": "3.7620064034151546"
       }
     },
     {
       "id": "HQ_22",
-      "description": "Plan A: Auto accessories in Parana with wrong fit or incompatible model",
       "candidates": 209,
-      "expected_plan": "Plan A",
       "chosen_plan": "Plan A",
-      "plan_matched": true,
-      "opt_latency_ms": 315.75,
-      "alt_latency_ms": 961.64,
-      "opt_citations_count": 5,
-      "alt_citations_count": 0,
+      "chosen_total_ms": 415.19,
+      "chosen_retrieval_ms": 72.66,
+      "other_total_ms": 864.11,
+      "other_retrieval_ms": 510.92,
+      "chose_faster_retrieval": true,
+      "citations": 5,
+      "matched_orders": 1,
       "aggregates": {
-        "count_star()": "234",
-        "avg(order_reviews.review_score)": "3.9786324786324787"
+        "count_star()": "209",
+        "avg(order_reviews.review_score)": "4.07177033492823"
       }
     },
     {
       "id": "HQ_23",
-      "description": "Plan A: Garden tools with bent blades or rusted parts",
       "candidates": 488,
-      "expected_plan": "Plan A",
       "chosen_plan": "Plan A",
-      "plan_matched": true,
-      "opt_latency_ms": 310.3,
-      "alt_latency_ms": 944.82,
-      "opt_citations_count": 5,
-      "alt_citations_count": 1,
+      "chosen_total_ms": 416.58,
+      "chosen_retrieval_ms": 74.79,
+      "other_total_ms": 860.11,
+      "other_retrieval_ms": 511.74,
+      "chose_faster_retrieval": true,
+      "citations": 5,
+      "matched_orders": 2,
       "aggregates": {
-        "count_star()": "603",
-        "avg(order_reviews.review_score)": "4.240464344941957"
+        "count_star()": "488",
+        "avg(order_reviews.review_score)": "4.25206611570248"
       }
     },
     {
       "id": "HQ_24",
-      "description": "Plan A: High installment credit card orders (>10 installments) with late delivery",
       "candidates": 13,
-      "expected_plan": "Plan A",
       "chosen_plan": "Plan A",
-      "plan_matched": true,
-      "opt_latency_ms": 294.53,
-      "alt_latency_ms": 796.62,
-      "opt_citations_count": 5,
-      "alt_citations_count": 0,
+      "chosen_total_ms": 397.24,
+      "chosen_retrieval_ms": 72.04,
+      "other_total_ms": 866.05,
+      "other_retrieval_ms": 529.09,
+      "chose_faster_retrieval": true,
+      "citations": 5,
+      "matched_orders": 0,
       "aggregates": {
         "count_star()": "13",
         "sum(order_payments.payment_value)": "3751.30"
@@ -398,31 +409,31 @@
     },
     {
       "id": "HQ_25",
-      "description": "Plan A: Extreme high value orders (>R$2500) with packaging damage",
       "candidates": 86,
-      "expected_plan": "Plan A",
       "chosen_plan": "Plan A",
-      "plan_matched": true,
-      "opt_latency_ms": 314.97,
-      "alt_latency_ms": 848.78,
-      "opt_citations_count": 5,
-      "alt_citations_count": 0,
+      "chosen_total_ms": 410.59,
+      "chosen_retrieval_ms": 87.66,
+      "other_total_ms": 831.13,
+      "other_retrieval_ms": 511.93,
+      "chose_faster_retrieval": true,
+      "citations": 5,
+      "matched_orders": 0,
       "aggregates": {
         "count_star()": "86",
-        "sum(order_payments.payment_value)": "303079.08"
+        "sum(order_payments.payment_value)": "304048.62"
       }
     },
     {
       "id": "HQ_26",
-      "description": "Plan A: Boleto payments in Rio de Janeiro with non-receipt of goods",
       "candidates": 16,
-      "expected_plan": "Plan A",
       "chosen_plan": "Plan A",
-      "plan_matched": true,
-      "opt_latency_ms": 282.93,
-      "alt_latency_ms": 800.42,
-      "opt_citations_count": 5,
-      "alt_citations_count": 0,
+      "chosen_total_ms": 423.31,
+      "chosen_retrieval_ms": 78.83,
+      "other_total_ms": 842.45,
+      "other_retrieval_ms": 495.6,
+      "chose_faster_retrieval": true,
+      "citations": 5,
+      "matched_orders": 1,
       "aggregates": {
         "count_star()": "16",
         "sum(order_payments.payment_value)": "3408.31"
@@ -430,31 +441,31 @@
     },
     {
       "id": "HQ_27",
-      "description": "Plan A: Voucher payment orders in Sao Paulo with canceled status",
       "candidates": 46,
-      "expected_plan": "Plan A",
       "chosen_plan": "Plan A",
-      "plan_matched": true,
-      "opt_latency_ms": 277.09,
-      "alt_latency_ms": 773.3,
-      "opt_citations_count": 5,
-      "alt_citations_count": 0,
+      "chosen_total_ms": 431.48,
+      "chosen_retrieval_ms": 88.71,
+      "other_total_ms": 858.19,
+      "other_retrieval_ms": 519.23,
+      "chose_faster_retrieval": true,
+      "citations": 5,
+      "matched_orders": 2,
       "aggregates": {
-        "count_star()": "66",
-        "sum(order_payments.payment_value)": "9357.50"
+        "count_star()": "46",
+        "sum(order_payments.payment_value)": "9441.96"
       }
     },
     {
       "id": "HQ_28",
-      "description": "Plan A: Debit card orders in Rio de Janeiro with fast arrival praise",
       "candidates": 185,
-      "expected_plan": "Plan A",
       "chosen_plan": "Plan A",
-      "plan_matched": true,
-      "opt_latency_ms": 315.19,
-      "alt_latency_ms": 836.2,
-      "opt_citations_count": 5,
-      "alt_citations_count": 0,
+      "chosen_total_ms": 406.85,
+      "chosen_retrieval_ms": 76.52,
+      "other_total_ms": 845.53,
+      "other_retrieval_ms": 518.05,
+      "chose_faster_retrieval": true,
+      "citations": 5,
+      "matched_orders": 1,
       "aggregates": {
         "count_star()": "185",
         "avg(order_reviews.review_score)": "3.9297297297297296"
@@ -462,319 +473,319 @@
     },
     {
       "id": "HQ_29",
-      "description": "Plan A: Orders with freight cost higher than product item price",
       "candidates": 1215,
-      "expected_plan": "Plan A",
       "chosen_plan": "Plan A",
-      "plan_matched": true,
-      "opt_latency_ms": 298.67,
-      "alt_latency_ms": 800.58,
-      "opt_citations_count": 5,
-      "alt_citations_count": 3,
+      "chosen_total_ms": 420.4,
+      "chosen_retrieval_ms": 90.81,
+      "other_total_ms": 849.28,
+      "other_retrieval_ms": 522.55,
+      "chose_faster_retrieval": true,
+      "citations": 5,
+      "matched_orders": 4,
       "aggregates": {
-        "count_star()": "1325",
-        "avg(order_items.freight_value)": "116.60159999999999"
+        "count_star()": "1215",
+        "avg(order_items.freight_value)": "112.29633598841419"
       }
     },
     {
       "id": "HQ_30",
-      "description": "Plan A: Small electronics in Rio de Janeiro with defective chargers",
       "candidates": 400,
-      "expected_plan": "Plan A",
       "chosen_plan": "Plan A",
-      "plan_matched": true,
-      "opt_latency_ms": 294.71,
-      "alt_latency_ms": 838.11,
-      "opt_citations_count": 5,
-      "alt_citations_count": 4,
+      "chosen_total_ms": 416.92,
+      "chosen_retrieval_ms": 74.86,
+      "other_total_ms": 857.35,
+      "other_retrieval_ms": 508.82,
+      "chose_faster_retrieval": true,
+      "citations": 5,
+      "matched_orders": 8,
       "aggregates": {
-        "count_star()": "432",
-        "avg(order_reviews.review_score)": "3.761574074074074"
+        "count_star()": "400",
+        "avg(order_reviews.review_score)": "3.8354430379746836"
       }
     },
     {
       "id": "HQ_31",
-      "description": "Plan A: Perfumery products delivered with leaky bottles in Santa Catarina",
       "candidates": 108,
-      "expected_plan": "Plan A",
       "chosen_plan": "Plan A",
-      "plan_matched": true,
-      "opt_latency_ms": 291.17,
-      "alt_latency_ms": 809.25,
-      "opt_citations_count": 5,
-      "alt_citations_count": 0,
+      "chosen_total_ms": 432.72,
+      "chosen_retrieval_ms": 77.67,
+      "other_total_ms": 864.76,
+      "other_retrieval_ms": 509.61,
+      "chose_faster_retrieval": true,
+      "citations": 5,
+      "matched_orders": 1,
       "aggregates": {
-        "count_star()": "117",
-        "avg(order_reviews.review_score)": "4.111111111111111"
+        "count_star()": "108",
+        "avg(order_reviews.review_score)": "4.130841121495327"
       }
     },
     {
       "id": "HQ_32",
-      "description": "Plan A: Office furniture with stripped screws in Minas Gerais",
       "candidates": 134,
-      "expected_plan": "Plan A",
       "chosen_plan": "Plan A",
-      "plan_matched": true,
-      "opt_latency_ms": 332.74,
-      "alt_latency_ms": 862.17,
-      "opt_citations_count": 5,
-      "alt_citations_count": 0,
+      "chosen_total_ms": 442.07,
+      "chosen_retrieval_ms": 90.96,
+      "other_total_ms": 881.47,
+      "other_retrieval_ms": 529.89,
+      "chose_faster_retrieval": true,
+      "citations": 5,
+      "matched_orders": 3,
       "aggregates": {
-        "count_star()": "167",
-        "avg(orders.delivery_delay_days)": "-14.688622754491018"
+        "count_star()": "134",
+        "avg(orders.delivery_delay_days)": "-14.567164179104477"
       }
     },
     {
       "id": "HQ_33",
-      "description": "Plan A: Stationery items in Parana with ink dried out or crushed pens",
       "candidates": 121,
-      "expected_plan": "Plan A",
       "chosen_plan": "Plan A",
-      "plan_matched": true,
-      "opt_latency_ms": 283.64,
-      "alt_latency_ms": 861.5,
-      "opt_citations_count": 5,
-      "alt_citations_count": 0,
+      "chosen_total_ms": 437.33,
+      "chosen_retrieval_ms": 92.71,
+      "other_total_ms": 868.67,
+      "other_retrieval_ms": 517.82,
+      "chose_faster_retrieval": true,
+      "citations": 5,
+      "matched_orders": 1,
       "aggregates": {
-        "count_star()": "128",
-        "avg(order_reviews.review_score)": "4.359375"
+        "count_star()": "121",
+        "avg(order_reviews.review_score)": "4.446280991735537"
       }
     },
     {
       "id": "HQ_34",
-      "description": "Plan A: Musical instruments in Sao Paulo with tuning or neck cracks",
       "candidates": 253,
-      "expected_plan": "Plan A",
       "chosen_plan": "Plan A",
-      "plan_matched": true,
-      "opt_latency_ms": 337.91,
-      "alt_latency_ms": 859.34,
-      "opt_citations_count": 5,
-      "alt_citations_count": 4,
+      "chosen_total_ms": 421.79,
+      "chosen_retrieval_ms": 74.88,
+      "other_total_ms": 866.69,
+      "other_retrieval_ms": 523.59,
+      "chose_faster_retrieval": true,
+      "citations": 5,
+      "matched_orders": 6,
       "aggregates": {
-        "count_star()": "267",
-        "avg(order_reviews.review_score)": "4.228464419475656"
+        "count_star()": "253",
+        "avg(order_reviews.review_score)": "4.254980079681275"
       }
     },
     {
       "id": "HQ_35",
-      "description": "Plan A: Pet shop products in Rio de Janeiro with expired food or open bag",
       "candidates": 199,
-      "expected_plan": "Plan A",
       "chosen_plan": "Plan A",
-      "plan_matched": true,
-      "opt_latency_ms": 314.62,
-      "alt_latency_ms": 833.96,
-      "opt_citations_count": 5,
-      "alt_citations_count": 1,
+      "chosen_total_ms": 422.15,
+      "chosen_retrieval_ms": 74.37,
+      "other_total_ms": 853.31,
+      "other_retrieval_ms": 513.65,
+      "chose_faster_retrieval": true,
+      "citations": 5,
+      "matched_orders": 0,
       "aggregates": {
-        "count_star()": "217",
-        "avg(order_reviews.review_score)": "3.8940092165898617"
+        "count_star()": "199",
+        "avg(order_reviews.review_score)": "3.9646464646464645"
       }
     },
     {
       "id": "HQ_36",
-      "description": "Plan A: Luggage and travel accessories in Minas Gerais with broken handle",
       "candidates": 176,
-      "expected_plan": "Plan A",
       "chosen_plan": "Plan A",
-      "plan_matched": true,
-      "opt_latency_ms": 307.49,
-      "alt_latency_ms": 830.47,
-      "opt_citations_count": 5,
-      "alt_citations_count": 0,
+      "chosen_total_ms": 435.82,
+      "chosen_retrieval_ms": 90.01,
+      "other_total_ms": 878.04,
+      "other_retrieval_ms": 529.63,
+      "chose_faster_retrieval": true,
+      "citations": 5,
+      "matched_orders": 0,
       "aggregates": {
-        "count_star()": "183",
-        "avg(order_reviews.review_score)": "4.426229508196721"
+        "count_star()": "176",
+        "avg(order_reviews.review_score)": "4.465909090909091"
       }
     },
     {
       "id": "HQ_37",
-      "description": "Plan A: Bed bath table high thread count in Sao Paulo with color fading",
       "candidates": 629,
-      "expected_plan": "Plan A",
       "chosen_plan": "Plan A",
-      "plan_matched": true,
-      "opt_latency_ms": 357.52,
-      "alt_latency_ms": 847.03,
-      "opt_citations_count": 5,
-      "alt_citations_count": 2,
+      "chosen_total_ms": 462.8,
+      "chosen_retrieval_ms": 103.53,
+      "other_total_ms": 883.71,
+      "other_retrieval_ms": 512.22,
+      "chose_faster_retrieval": true,
+      "citations": 5,
+      "matched_orders": 4,
       "aggregates": {
-        "count_star()": "1014",
-        "avg(order_reviews.review_score)": "3.7514792899408285"
+        "count_star()": "629",
+        "avg(order_reviews.review_score)": "3.951534733441034"
       }
     },
     {
       "id": "HQ_38",
-      "description": "Plan A: Consoles and games in Rio de Janeiro with unreadable disc",
       "candidates": 131,
-      "expected_plan": "Plan A",
       "chosen_plan": "Plan A",
-      "plan_matched": true,
-      "opt_latency_ms": 323.53,
-      "alt_latency_ms": 886.11,
-      "opt_citations_count": 5,
-      "alt_citations_count": 0,
+      "chosen_total_ms": 434.04,
+      "chosen_retrieval_ms": 90.89,
+      "other_total_ms": 878.53,
+      "other_retrieval_ms": 529.39,
+      "chose_faster_retrieval": true,
+      "citations": 5,
+      "matched_orders": 2,
       "aggregates": {
-        "count_star()": "138",
-        "avg(order_reviews.review_score)": "4.043478260869565"
+        "count_star()": "131",
+        "avg(order_reviews.review_score)": "4.062992125984252"
       }
     },
     {
       "id": "HQ_39",
-      "description": "Plan A: Cool stuff category with novelty item broken in transit in Bahia",
       "candidates": 139,
-      "expected_plan": "Plan A",
       "chosen_plan": "Plan A",
-      "plan_matched": true,
-      "opt_latency_ms": 289.89,
-      "alt_latency_ms": 798.45,
-      "opt_citations_count": 5,
-      "alt_citations_count": 0,
+      "chosen_total_ms": 435.16,
+      "chosen_retrieval_ms": 94.23,
+      "other_total_ms": 866.61,
+      "other_retrieval_ms": 516.43,
+      "chose_faster_retrieval": true,
+      "citations": 5,
+      "matched_orders": 2,
       "aggregates": {
-        "count_star()": "146",
-        "avg(order_reviews.review_score)": "3.9863013698630136"
+        "count_star()": "139",
+        "avg(order_reviews.review_score)": "3.9784172661870505"
       }
     },
     {
       "id": "HQ_40",
-      "description": "Plan A: Health & beauty in Parana with unsealed safety stamp",
       "candidates": 381,
-      "expected_plan": "Plan A",
       "chosen_plan": "Plan A",
-      "plan_matched": true,
-      "opt_latency_ms": 312.66,
-      "alt_latency_ms": 973.8,
-      "opt_citations_count": 5,
-      "alt_citations_count": 1,
+      "chosen_total_ms": 436.67,
+      "chosen_retrieval_ms": 94.78,
+      "other_total_ms": 861.26,
+      "other_retrieval_ms": 517.07,
+      "chose_faster_retrieval": true,
+      "citations": 5,
+      "matched_orders": 1,
       "aggregates": {
-        "count_star()": "422",
-        "avg(order_reviews.review_score)": "4.251184834123222"
+        "count_star()": "381",
+        "avg(order_reviews.review_score)": "4.306878306878307"
       }
     },
     {
       "id": "HQ_41",
-      "description": "Plan A: Food and drinks with dented cans or expired lot number",
       "candidates": 246,
-      "expected_plan": "Plan A",
       "chosen_plan": "Plan A",
-      "plan_matched": true,
-      "opt_latency_ms": 406.65,
-      "alt_latency_ms": 1028.86,
-      "opt_citations_count": 5,
-      "alt_citations_count": 1,
+      "chosen_total_ms": 432.73,
+      "chosen_retrieval_ms": 89.52,
+      "other_total_ms": 877.72,
+      "other_retrieval_ms": 529.1,
+      "chose_faster_retrieval": true,
+      "citations": 5,
+      "matched_orders": 2,
       "aggregates": {
-        "count_star()": "276",
-        "avg(order_reviews.review_score)": "4.2355072463768115"
+        "count_star()": "246",
+        "avg(order_reviews.review_score)": "4.337448559670782"
       }
     },
     {
       "id": "HQ_42",
-      "description": "Plan A: Construction tools in Rio de Janeiro with burned out motor",
       "candidates": 105,
-      "expected_plan": "Plan A",
       "chosen_plan": "Plan A",
-      "plan_matched": true,
-      "opt_latency_ms": 427.34,
-      "alt_latency_ms": 991.39,
-      "opt_citations_count": 5,
-      "alt_citations_count": 1,
+      "chosen_total_ms": 421.86,
+      "chosen_retrieval_ms": 74.35,
+      "other_total_ms": 857.96,
+      "other_retrieval_ms": 513.81,
+      "chose_faster_retrieval": true,
+      "citations": 5,
+      "matched_orders": 3,
       "aggregates": {
-        "count_star()": "117",
-        "avg(order_reviews.review_score)": "3.3333333333333335"
+        "count_star()": "105",
+        "avg(order_reviews.review_score)": "3.47"
       }
     },
     {
       "id": "HQ_43",
-      "description": "Plan B: Broad Plan B: All orders paid by credit card with general customer service praise",
       "candidates": 76505,
-      "expected_plan": "Plan B",
       "chosen_plan": "Plan B",
-      "plan_matched": true,
-      "opt_latency_ms": 1071.52,
-      "alt_latency_ms": 679.2,
-      "opt_citations_count": 5,
-      "alt_citations_count": 5,
+      "chosen_total_ms": 405.37,
+      "chosen_retrieval_ms": 78.3,
+      "other_total_ms": 676.56,
+      "other_retrieval_ms": 339.39,
+      "chose_faster_retrieval": true,
+      "citations": 5,
+      "matched_orders": 303,
       "aggregates": {
-        "count_star()": "75991",
-        "avg(order_reviews.review_score)": "4.089747470095143"
+        "count_star()": "76505",
+        "avg(order_reviews.review_score)": "4.090032494121998"
       }
     },
     {
       "id": "HQ_44",
-      "description": "Plan B: Broad Plan B: All orders paid by boleto with delivery delay complaints",
       "candidates": 19784,
-      "expected_plan": "Plan B",
-      "chosen_plan": "Plan B",
-      "plan_matched": true,
-      "opt_latency_ms": 1002.71,
-      "alt_latency_ms": 459.01,
-      "opt_citations_count": 5,
-      "alt_citations_count": 5,
+      "chosen_plan": "Plan A",
+      "chosen_total_ms": 467.29,
+      "chosen_retrieval_ms": 138.16,
+      "other_total_ms": 498.8,
+      "other_retrieval_ms": 161.18,
+      "chose_faster_retrieval": true,
+      "citations": 5,
+      "matched_orders": 73,
       "aggregates": {
-        "count_star()": "19598",
+        "count_star()": "19784",
         "avg(order_reviews.review_score)": "4.088376364935198"
       }
     },
     {
       "id": "HQ_45",
-      "description": "Plan B: Broad Plan B: All orders in Sao Paulo state with courier logistics praise",
       "candidates": 41746,
-      "expected_plan": "Plan B",
       "chosen_plan": "Plan B",
-      "plan_matched": true,
-      "opt_latency_ms": 1056.73,
-      "alt_latency_ms": 713.95,
-      "opt_citations_count": 5,
-      "alt_citations_count": 5,
+      "chosen_total_ms": 420.7,
+      "chosen_retrieval_ms": 90.92,
+      "other_total_ms": 648.09,
+      "other_retrieval_ms": 309.99,
+      "chose_faster_retrieval": true,
+      "citations": 5,
+      "matched_orders": 202,
       "aggregates": {
-        "count_star()": "41360",
+        "count_star()": "41746",
         "avg(order_reviews.review_score)": "4.175628626692457"
       }
     },
     {
       "id": "HQ_46",
-      "description": "Plan B: Broad Plan B: All delivered orders with perfect 5-star product satisfaction",
       "candidates": 96478,
-      "expected_plan": "Plan B",
       "chosen_plan": "Plan B",
-      "plan_matched": true,
-      "opt_latency_ms": 1018.32,
-      "alt_latency_ms": 719.22,
-      "opt_citations_count": 5,
-      "alt_citations_count": 5,
+      "chosen_total_ms": 398.44,
+      "chosen_retrieval_ms": 66.05,
+      "other_total_ms": 693.53,
+      "other_retrieval_ms": 357.8,
+      "chose_faster_retrieval": true,
+      "citations": 5,
+      "matched_orders": 406,
       "aggregates": {
-        "count_star()": "95598",
+        "count_star()": "96478",
         "avg(order_reviews.review_score)": "4.157953095253038"
       }
     },
     {
       "id": "HQ_47",
-      "description": "Plan B: Broad Plan B: Orders with single installment payment and wrong item delivered",
       "candidates": 49060,
-      "expected_plan": "Plan B",
       "chosen_plan": "Plan B",
-      "plan_matched": true,
-      "opt_latency_ms": 1073.48,
-      "alt_latency_ms": 711.2,
-      "opt_citations_count": 5,
-      "alt_citations_count": 5,
+      "chosen_total_ms": 423.71,
+      "chosen_retrieval_ms": 87.56,
+      "other_total_ms": 653.28,
+      "other_retrieval_ms": 319.25,
+      "chose_faster_retrieval": true,
+      "citations": 5,
+      "matched_orders": 197,
       "aggregates": {
-        "count_star()": "52079",
-        "avg(order_reviews.review_score)": "4.112943796923904"
+        "count_star()": "49060",
+        "avg(order_reviews.review_score)": "4.1191029729451705"
       }
     },
     {
       "id": "HQ_48",
-      "description": "Plan B: Broad Plan B: Orders in Rio de Janeiro state with delivery delay complaints",
       "candidates": 12852,
-      "expected_plan": "Plan B",
-      "chosen_plan": "Plan B",
-      "plan_matched": true,
-      "opt_latency_ms": 1029.5,
-      "alt_latency_ms": 377.84,
-      "opt_citations_count": 5,
-      "alt_citations_count": 5,
+      "chosen_plan": "Plan A",
+      "chosen_total_ms": 435.22,
+      "chosen_retrieval_ms": 106.78,
+      "other_total_ms": 560.52,
+      "other_retrieval_ms": 234.82,
+      "chose_faster_retrieval": true,
+      "citations": 5,
+      "matched_orders": 76,
       "aggregates": {
         "count_star()": "12852",
         "avg(orders.delivery_delay_days)": "-11.766858253055938"
@@ -782,34 +793,226 @@
     },
     {
       "id": "HQ_49",
-      "description": "Plan B: Broad Plan B: Orders with low freight (under R$20) praising free or cheap shipping",
       "candidates": 71478,
-      "expected_plan": "Plan B",
       "chosen_plan": "Plan B",
-      "plan_matched": true,
-      "opt_latency_ms": 964.36,
-      "alt_latency_ms": 723.41,
-      "opt_citations_count": 5,
-      "alt_citations_count": 5,
+      "chosen_total_ms": 404.82,
+      "chosen_retrieval_ms": 67.83,
+      "other_total_ms": 686.03,
+      "other_retrieval_ms": 348.09,
+      "chose_faster_retrieval": true,
+      "citations": 5,
+      "matched_orders": 324,
       "aggregates": {
-        "count_star()": "81419",
-        "avg(order_items.freight_value)": "14.002879303356709"
+        "count_star()": "71478",
+        "avg(order_items.freight_value)": "14.26769930146124"
       }
     },
     {
       "id": "HQ_50",
-      "description": "Plan B: Broad Plan B: Orders across Minas Gerais with packaging condition remarks",
       "candidates": 11635,
-      "expected_plan": "Plan B",
-      "chosen_plan": "Plan B",
-      "plan_matched": true,
-      "opt_latency_ms": 963.21,
-      "alt_latency_ms": 386.67,
-      "opt_citations_count": 5,
-      "alt_citations_count": 5,
+      "chosen_plan": "Plan A",
+      "chosen_total_ms": 433.31,
+      "chosen_retrieval_ms": 109.22,
+      "other_total_ms": 564.64,
+      "other_retrieval_ms": 231.55,
+      "chose_faster_retrieval": true,
+      "citations": 5,
+      "matched_orders": 49,
       "aggregates": {
-        "count_star()": "11526",
+        "count_star()": "11635",
         "avg(order_reviews.review_score)": "4.138903348950199"
+      }
+    },
+    {
+      "id": "HQ_51",
+      "candidates": 5466,
+      "chosen_plan": "Plan A",
+      "chosen_total_ms": 422.33,
+      "chosen_retrieval_ms": 97.04,
+      "other_total_ms": 818.53,
+      "other_retrieval_ms": 480.09,
+      "chose_faster_retrieval": true,
+      "citations": 5,
+      "matched_orders": 24,
+      "aggregates": {
+        "count_star()": "5466",
+        "round(sum(order_payments.payment_value), 2)": "890898.54"
+      }
+    },
+    {
+      "id": "HQ_52",
+      "candidates": 11635,
+      "chosen_plan": "Plan A",
+      "chosen_total_ms": 416.29,
+      "chosen_retrieval_ms": 89.35,
+      "other_total_ms": 558.15,
+      "other_retrieval_ms": 232.76,
+      "chose_faster_retrieval": true,
+      "citations": 5,
+      "matched_orders": 52,
+      "aggregates": {
+        "count_star()": "11635",
+        "round(sum(order_payments.payment_value), 2)": "1872257.26"
+      }
+    },
+    {
+      "id": "HQ_53",
+      "candidates": 12852,
+      "chosen_plan": "Plan A",
+      "chosen_total_ms": 446.46,
+      "chosen_retrieval_ms": 109.84,
+      "other_total_ms": 546.27,
+      "other_retrieval_ms": 220.47,
+      "chose_faster_retrieval": true,
+      "citations": 5,
+      "matched_orders": 62,
+      "aggregates": {
+        "count_star()": "12852",
+        "round(sum(order_payments.payment_value), 2)": "2144379.69"
+      }
+    },
+    {
+      "id": "HQ_54",
+      "candidates": 19784,
+      "chosen_plan": "Plan A",
+      "chosen_total_ms": 469.59,
+      "chosen_retrieval_ms": 138.49,
+      "other_total_ms": 485.76,
+      "other_retrieval_ms": 152.28,
+      "chose_faster_retrieval": true,
+      "citations": 5,
+      "matched_orders": 69,
+      "aggregates": {
+        "count_star()": "19784",
+        "round(sum(order_payments.payment_value), 2)": "2869361.27"
+      }
+    },
+    {
+      "id": "HQ_55",
+      "candidates": 9417,
+      "chosen_plan": "Plan A",
+      "chosen_total_ms": 415.99,
+      "chosen_retrieval_ms": 90.61,
+      "other_total_ms": 630.39,
+      "other_retrieval_ms": 293.0,
+      "chose_faster_retrieval": true,
+      "citations": 5,
+      "matched_orders": 57,
+      "aggregates": {
+        "count_star()": "9417",
+        "round(sum(order_payments.payment_value), 2)": "1265918.38"
+      }
+    },
+    {
+      "id": "HQ_56",
+      "candidates": 8836,
+      "chosen_plan": "Plan A",
+      "chosen_total_ms": 429.78,
+      "chosen_retrieval_ms": 105.2,
+      "other_total_ms": 626.0,
+      "other_retrieval_ms": 300.0,
+      "chose_faster_retrieval": true,
+      "citations": 5,
+      "matched_orders": 36,
+      "aggregates": {
+        "count_star()": "8836",
+        "round(sum(order_payments.payment_value), 2)": "1448729.73"
+      }
+    },
+    {
+      "id": "HQ_57",
+      "candidates": 7720,
+      "chosen_plan": "Plan A",
+      "chosen_total_ms": 422.0,
+      "chosen_retrieval_ms": 86.46,
+      "other_total_ms": 702.91,
+      "other_retrieval_ms": 363.33,
+      "chose_faster_retrieval": true,
+      "citations": 5,
+      "matched_orders": 25,
+      "aggregates": {
+        "count_star()": "7720",
+        "round(sum(order_payments.payment_value), 2)": "1166060.50"
+      }
+    },
+    {
+      "id": "HQ_58",
+      "candidates": 6449,
+      "chosen_plan": "Plan A",
+      "chosen_total_ms": 432.97,
+      "chosen_retrieval_ms": 102.2,
+      "other_total_ms": 747.23,
+      "other_retrieval_ms": 411.21,
+      "chose_faster_retrieval": true,
+      "citations": 5,
+      "matched_orders": 26,
+      "aggregates": {
+        "count_star()": "6449",
+        "round(sum(order_payments.payment_value), 2)": "932339.78"
+      }
+    },
+    {
+      "id": "HQ_59",
+      "candidates": 6689,
+      "chosen_plan": "Plan A",
+      "chosen_total_ms": 432.95,
+      "chosen_retrieval_ms": 87.25,
+      "other_total_ms": 730.15,
+      "other_retrieval_ms": 392.36,
+      "chose_faster_retrieval": true,
+      "citations": 5,
+      "matched_orders": 91,
+      "aggregates": {
+        "count_star()": "6689",
+        "round(sum(order_payments.payment_value), 2)": "1066263.82"
+      }
+    },
+    {
+      "id": "HQ_60",
+      "candidates": 6535,
+      "chosen_plan": "Plan A",
+      "chosen_total_ms": 427.73,
+      "chosen_retrieval_ms": 96.71,
+      "other_total_ms": 730.31,
+      "other_retrieval_ms": 402.33,
+      "chose_faster_retrieval": true,
+      "citations": 5,
+      "matched_orders": 92,
+      "aggregates": {
+        "count_star()": "6535",
+        "round(sum(order_payments.payment_value), 2)": "1150909.75"
+      }
+    },
+    {
+      "id": "HQ_61",
+      "candidates": 10551,
+      "chosen_plan": "Plan A",
+      "chosen_total_ms": 415.43,
+      "chosen_retrieval_ms": 92.7,
+      "other_total_ms": 575.85,
+      "other_retrieval_ms": 243.14,
+      "chose_faster_retrieval": true,
+      "citations": 5,
+      "matched_orders": 56,
+      "aggregates": {
+        "count_star()": "10551",
+        "round(sum(order_payments.payment_value), 2)": "3797127.49"
+      }
+    },
+    {
+      "id": "HQ_62",
+      "candidates": 7017,
+      "chosen_plan": "Plan A",
+      "chosen_total_ms": 415.75,
+      "chosen_retrieval_ms": 84.24,
+      "other_total_ms": 716.18,
+      "other_retrieval_ms": 382.04,
+      "chose_faster_retrieval": true,
+      "citations": 5,
+      "matched_orders": 23,
+      "aggregates": {
+        "count_star()": "7017",
+        "round(sum(order_payments.payment_value), 2)": "1239732.25"
       }
     }
   ]

@@ -5,7 +5,6 @@
     "natural_language": "Find delivered orders over R$300 paid by credit card in Rio de Janeiro where customers complained about broken or damaged packaging.",
     "sql_filter": "orders.order_status = 'delivered' AND order_payments.payment_type = 'credit_card' AND order_payments.payment_value > 300 AND customers.customer_state = 'RJ'",
     "semantic_query": "broken damaged shattered packaging arrived in pieces defective",
-    "expected_plan": "Plan A",
     "target_metrics": [
       "COUNT(*)",
       "SUM(order_payments.payment_value)"
@@ -17,7 +16,6 @@
     "natural_language": "Delivered health and beauty products delayed by more than 10 days where reviews mention fake or counterfeit items.",
     "sql_filter": "orders.order_status = 'delivered' AND products.product_category_name_english = 'health_beauty' AND orders.delivery_delay_days > 10",
     "semantic_query": "fake counterfeit falsificado product not original poor quality scam",
-    "expected_plan": "Plan A",
     "target_metrics": [
       "COUNT(*)",
       "AVG(orders.delivery_delay_days)"
@@ -29,7 +27,6 @@
     "natural_language": "Delivered orders where customers complained that pieces or accessories were missing from the package.",
     "sql_filter": "orders.order_status = 'delivered'",
     "semantic_query": "missing parts missing items incomplete package pieces absent faltando pecas",
-    "expected_plan": "Plan B",
     "target_metrics": [
       "COUNT(*)",
       "AVG(order_reviews.review_score)"
@@ -41,7 +38,6 @@
     "natural_language": "Orders paid with voucher in Minas Gerais that never arrived or took weeks past estimated delivery.",
     "sql_filter": "order_payments.payment_type = 'voucher' AND customers.customer_state = 'MG' AND orders.delivery_delay_days > 5",
     "semantic_query": "never arrived did not receive product missing delivery nao chegou atraso",
-    "expected_plan": "Plan A",
     "target_metrics": [
       "COUNT(*)",
       "SUM(order_payments.payment_value)"
@@ -53,7 +49,6 @@
     "natural_language": "Find all customer reviews complaining about rude, unprofessional courier or delivery driver behavior.",
     "sql_filter": "1=1",
     "semantic_query": "rude courier unprofessional delivery driver grossier entregador pessimo atendimento",
-    "expected_plan": "Plan B",
     "target_metrics": [
       "COUNT(*)",
       "AVG(order_reviews.review_score)"
@@ -65,7 +60,6 @@
     "natural_language": "Computer accessories bought in more than 6 installments where the item stopped working or did not turn on.",
     "sql_filter": "products.product_category_name_english = 'computers_accessories' AND order_payments.payment_installments > 6",
     "semantic_query": "does not work stopped working defective broken power cord quebrado nao liga",
-    "expected_plan": "Plan A",
     "target_metrics": [
       "COUNT(*)",
       "SUM(order_payments.payment_value)",
@@ -78,7 +72,6 @@
     "natural_language": "Orders where freight was greater than R$50 and customers complained about unjustified delivery fees.",
     "sql_filter": "order_items.freight_value > 50",
     "semantic_query": "expensive freight delivery fee absurd shipping cost frete muito caro",
-    "expected_plan": "Plan A",
     "target_metrics": [
       "COUNT(*)",
       "AVG(order_items.freight_value)"
@@ -90,7 +83,6 @@
     "natural_language": "Delivered orders where customers praised super fast or before-deadline arrival.",
     "sql_filter": "orders.order_status = 'delivered'",
     "semantic_query": "arrived early fast delivery before estimated date excelente entrega rapida antes do prazo",
-    "expected_plan": "Plan B",
     "target_metrics": [
       "COUNT(*)",
       "AVG(order_reviews.review_score)"
@@ -102,7 +94,6 @@
     "natural_language": "Canceled orders where reviews demand a full refund or chargeback on credit card.",
     "sql_filter": "orders.order_status = 'canceled' AND order_payments.payment_type = 'credit_card'",
     "semantic_query": "refund my money chargeback estorno devolucao quero meu dinheiro de volta",
-    "expected_plan": "Plan A",
     "target_metrics": [
       "COUNT(*)",
       "SUM(order_payments.payment_value)"
@@ -110,11 +101,10 @@
   },
   {
     "id": "HQ_10",
-    "description": "High Selectivity: Watches & Gifts in S\u00e3o Paulo with wrong color or wrong model sent",
+    "description": "High Selectivity: Watches & Gifts in São Paulo with wrong color or wrong model sent",
     "natural_language": "Watches and gifts ordered in SP where the seller sent the wrong model, color, or size.",
     "sql_filter": "products.product_category_name_english = 'watches_gifts' AND customers.customer_state = 'SP'",
     "semantic_query": "wrong model wrong color wrong product sent veio errado modelo diferente cor errada",
-    "expected_plan": "Plan A",
     "target_metrics": [
       "COUNT(*)",
       "AVG(order_reviews.review_score)"
@@ -126,7 +116,6 @@
     "natural_language": "Find mobile phones in RJ where customers complained about damaged screens or bad batteries.",
     "sql_filter": "products.product_category_name_english = 'telephony' AND customers.customer_state = 'RJ'",
     "semantic_query": "broken screen cracked display battery drains fast bateria tela quebrada",
-    "expected_plan": "Plan A",
     "target_metrics": [
       "COUNT(*)",
       "AVG(orders.delivery_delay_days)"
@@ -138,7 +127,6 @@
     "natural_language": "Electronics with payment above R$500 that did not function properly.",
     "sql_filter": "products.product_category_name_english = 'electronics' AND order_payments.payment_value > 500",
     "semantic_query": "does not turn on defective warranty stop working nao liga defeito garantia",
-    "expected_plan": "Plan A",
     "target_metrics": [
       "COUNT(*)",
       "SUM(order_payments.payment_value)"
@@ -150,7 +138,6 @@
     "natural_language": "Audio products delivered in MG where reviews mention distortion or poor audio.",
     "sql_filter": "products.product_category_name_english = 'audio' AND customers.customer_state = 'MG'",
     "semantic_query": "distorted sound buzzing noise low volume chiado som baixo ruim",
-    "expected_plan": "Plan A",
     "target_metrics": [
       "COUNT(*)",
       "AVG(order_reviews.review_score)"
@@ -162,7 +149,6 @@
     "natural_language": "Furniture orders in SP delayed by over 15 days past estimate.",
     "sql_filter": "products.product_category_name_english = 'furniture_decor' AND customers.customer_state = 'SP' AND orders.delivery_delay_days > 15",
     "semantic_query": "extremely late delayed weeks past deadline entrega muito atrasada descaso",
-    "expected_plan": "Plan A",
     "target_metrics": [
       "COUNT(*)",
       "AVG(orders.delivery_delay_days)"
@@ -174,7 +160,6 @@
     "natural_language": "Bed bath and table items in PR where customer complained about fabric quality or stains.",
     "sql_filter": "products.product_category_name_english = 'bed_bath_table' AND customers.customer_state = 'PR'",
     "semantic_query": "torn fabric stained dirty poor stitching tecido rasgado manchado costura solta",
-    "expected_plan": "Plan A",
     "target_metrics": [
       "COUNT(*)",
       "AVG(order_reviews.review_score)"
@@ -186,7 +171,6 @@
     "natural_language": "Houseware items in SC where package was shattered upon delivery.",
     "sql_filter": "products.product_category_name_english = 'housewares' AND customers.customer_state = 'SC'",
     "semantic_query": "broken glass shattered plate cup shards vidro quebrado cacos despedacado",
-    "expected_plan": "Plan A",
     "target_metrics": [
       "COUNT(*)",
       "SUM(order_payments.payment_value)"
@@ -198,7 +182,6 @@
     "natural_language": "Fashion bags bought in Rio Grande do Sul with defective zippers or seams.",
     "sql_filter": "products.product_category_name_english = 'fashion_bags_accessories' AND customers.customer_state = 'RS'",
     "semantic_query": "zipper broken torn strap defective zipper fecho quebrado alca rasgada",
-    "expected_plan": "Plan A",
     "target_metrics": [
       "COUNT(*)",
       "AVG(order_reviews.review_score)"
@@ -210,7 +193,6 @@
     "natural_language": "Watches and gifts priced over R$1000 where watch arrived stopped or dead.",
     "sql_filter": "products.product_category_name_english = 'watches_gifts' AND order_payments.payment_value > 1000",
     "semantic_query": "watch stopped not working battery dead stopped ticking relogio parado nao funciona",
-    "expected_plan": "Plan A",
     "target_metrics": [
       "COUNT(*)",
       "SUM(order_payments.payment_value)"
@@ -222,7 +204,6 @@
     "natural_language": "Sports items in Bahia where parts were absent or hardware was missing.",
     "sql_filter": "products.product_category_name_english = 'sports_leisure' AND customers.customer_state = 'BA'",
     "semantic_query": "missing screws bolts incomplete parts faltando pecas parafusos incompleto",
-    "expected_plan": "Plan A",
     "target_metrics": [
       "COUNT(*)",
       "AVG(order_reviews.review_score)"
@@ -234,7 +215,6 @@
     "natural_language": "Toys orders in Sao Paulo where pieces arrived crushed or broken.",
     "sql_filter": "products.product_category_name_english = 'toys' AND customers.customer_state = 'SP'",
     "semantic_query": "broken plastic crushed box cracked toy brinquedo quebrado caixa amassada",
-    "expected_plan": "Plan A",
     "target_metrics": [
       "COUNT(*)",
       "AVG(order_reviews.review_score)"
@@ -246,7 +226,6 @@
     "natural_language": "Baby items where parents complained of strong chemical smell or safety hazard.",
     "sql_filter": "products.product_category_name_english = 'baby' AND order_payments.payment_value > 150",
     "semantic_query": "bad smell chemical odor toxic unsafe cheiro forte perigoso toxico",
-    "expected_plan": "Plan A",
     "target_metrics": [
       "COUNT(*)",
       "AVG(order_reviews.review_score)"
@@ -258,7 +237,6 @@
     "natural_language": "Automotive parts in PR where part did not fit the car vehicle.",
     "sql_filter": "products.product_category_name_english = 'auto' AND customers.customer_state = 'PR'",
     "semantic_query": "does not fit wrong size incompatible car model nao coube modelo errado incompativel",
-    "expected_plan": "Plan A",
     "target_metrics": [
       "COUNT(*)",
       "AVG(order_reviews.review_score)"
@@ -270,7 +248,6 @@
     "natural_language": "Garden tools orders in Minas Gerais delivered with rust or damage.",
     "sql_filter": "products.product_category_name_english = 'garden_tools' AND customers.customer_state = 'MG'",
     "semantic_query": "rusted metal bent blade defective tool enferrujado torto com defeito",
-    "expected_plan": "Plan A",
     "target_metrics": [
       "COUNT(*)",
       "AVG(order_reviews.review_score)"
@@ -282,7 +259,6 @@
     "natural_language": "Orders split into more than 10 installments that were delayed.",
     "sql_filter": "order_payments.payment_installments > 10 AND orders.delivery_delay_days > 7",
     "semantic_query": "late delivery waiting for weeks atraso absurdo muitas parcelas",
-    "expected_plan": "Plan A",
     "target_metrics": [
       "COUNT(*)",
       "SUM(order_payments.payment_value)"
@@ -294,7 +270,6 @@
     "natural_language": "Luxury or high value orders above R$2500 with damaged outer packaging.",
     "sql_filter": "order_payments.payment_value > 2500",
     "semantic_query": "damaged package torn box crushed packaging caixa danificada rasgada",
-    "expected_plan": "Plan A",
     "target_metrics": [
       "COUNT(*)",
       "SUM(order_payments.payment_value)"
@@ -306,7 +281,6 @@
     "natural_language": "Orders paid by boleto bank slip in RJ that were marked canceled or never arrived.",
     "sql_filter": "order_payments.payment_type = 'boleto' AND customers.customer_state = 'RJ' AND orders.order_status = 'canceled'",
     "semantic_query": "paid boleto never received product paguei boleto nao recebi estorno",
-    "expected_plan": "Plan A",
     "target_metrics": [
       "COUNT(*)",
       "SUM(order_payments.payment_value)"
@@ -318,7 +292,6 @@
     "natural_language": "Voucher orders in SP that ended in cancellation.",
     "sql_filter": "order_payments.payment_type = 'voucher' AND customers.customer_state = 'SP' AND orders.order_status = 'canceled'",
     "semantic_query": "canceled without notice canceled order cancelado sem aviso estorno",
-    "expected_plan": "Plan A",
     "target_metrics": [
       "COUNT(*)",
       "SUM(order_payments.payment_value)"
@@ -330,7 +303,6 @@
     "natural_language": "Debit card payments in RJ where customers commended rapid delivery.",
     "sql_filter": "order_payments.payment_type = 'debit_card' AND customers.customer_state = 'RJ'",
     "semantic_query": "fast delivery arrived super fast chegou rapido excelente atendimento",
-    "expected_plan": "Plan A",
     "target_metrics": [
       "COUNT(*)",
       "AVG(order_reviews.review_score)"
@@ -342,7 +314,6 @@
     "natural_language": "Orders where freight value was greater than R$80.",
     "sql_filter": "order_items.freight_value > 80",
     "semantic_query": "abusive freight exorbitant shipping cost frete carissimo um absurdo",
-    "expected_plan": "Plan A",
     "target_metrics": [
       "COUNT(*)",
       "AVG(order_items.freight_value)"
@@ -354,7 +325,6 @@
     "natural_language": "Electronics in RJ where power adapter or cable failed to charge.",
     "sql_filter": "products.product_category_name_english = 'electronics' AND customers.customer_state = 'RJ'",
     "semantic_query": "charger does not work bad cable nao carrega cabo com defeito",
-    "expected_plan": "Plan A",
     "target_metrics": [
       "COUNT(*)",
       "AVG(order_reviews.review_score)"
@@ -366,7 +336,6 @@
     "natural_language": "Perfumery items in SC where perfume bottle leaked in transit.",
     "sql_filter": "products.product_category_name_english = 'perfumery' AND customers.customer_state = 'SC'",
     "semantic_query": "perfume leaked spilled in package frasco quebrado vazando perfume",
-    "expected_plan": "Plan A",
     "target_metrics": [
       "COUNT(*)",
       "AVG(order_reviews.review_score)"
@@ -378,7 +347,6 @@
     "natural_language": "Office furniture in MG with missing assembly hardware.",
     "sql_filter": "products.product_category_name_english = 'office_furniture' AND customers.customer_state = 'MG'",
     "semantic_query": "stripped screw missing bolts cannot assemble parafusos espanados faltando",
-    "expected_plan": "Plan A",
     "target_metrics": [
       "COUNT(*)",
       "AVG(orders.delivery_delay_days)"
@@ -390,7 +358,6 @@
     "natural_language": "Stationery products in PR with dry pens or broken stationery.",
     "sql_filter": "products.product_category_name_english = 'stationery' AND customers.customer_state = 'PR'",
     "semantic_query": "dry ink broken pen crushed box tinta seca caneta quebrada",
-    "expected_plan": "Plan A",
     "target_metrics": [
       "COUNT(*)",
       "AVG(order_reviews.review_score)"
@@ -402,7 +369,6 @@
     "natural_language": "Musical instruments in SP with physical damage or structural crack.",
     "sql_filter": "products.product_category_name_english = 'musical_instruments' AND customers.customer_state = 'SP'",
     "semantic_query": "cracked neck broken string damaged instrument braco trincado quebrado",
-    "expected_plan": "Plan A",
     "target_metrics": [
       "COUNT(*)",
       "AVG(order_reviews.review_score)"
@@ -414,7 +380,6 @@
     "natural_language": "Pet supplies in RJ with torn pet food packaging.",
     "sql_filter": "products.product_category_name_english = 'pet_shop' AND customers.customer_state = 'RJ'",
     "semantic_query": "open bag expired pet food torn package racao vencida pacote aberto",
-    "expected_plan": "Plan A",
     "target_metrics": [
       "COUNT(*)",
       "AVG(order_reviews.review_score)"
@@ -426,7 +391,6 @@
     "natural_language": "Luggage items in MG with broken telescoping handles or snapped wheels.",
     "sql_filter": "products.product_category_name_english = 'luggage_accessories' AND customers.customer_state = 'MG'",
     "semantic_query": "broken wheel snapped handle roda quebrada alca solta",
-    "expected_plan": "Plan A",
     "target_metrics": [
       "COUNT(*)",
       "AVG(order_reviews.review_score)"
@@ -438,7 +402,6 @@
     "natural_language": "Bed and bath linens in SP with color running or discoloration after first wash.",
     "sql_filter": "products.product_category_name_english = 'bed_bath_table' AND customers.customer_state = 'SP' AND order_payments.payment_value > 200",
     "semantic_query": "discolored faded color washed out desbotado soltou tinta na lavagem",
-    "expected_plan": "Plan A",
     "target_metrics": [
       "COUNT(*)",
       "AVG(order_reviews.review_score)"
@@ -450,7 +413,6 @@
     "natural_language": "Video games or consoles in RJ with scratched disc or game error.",
     "sql_filter": "products.product_category_name_english = 'consoles_games' AND customers.customer_state = 'RJ'",
     "semantic_query": "scratched disc game error disc cannot read midia riscada nao le o disco",
-    "expected_plan": "Plan A",
     "target_metrics": [
       "COUNT(*)",
       "AVG(order_reviews.review_score)"
@@ -462,7 +424,6 @@
     "natural_language": "Cool stuff items in BA where novelty gadget arrived non-functional.",
     "sql_filter": "products.product_category_name_english = 'cool_stuff' AND customers.customer_state = 'BA'",
     "semantic_query": "novelty broken non functional stopped working quebrado nao liga produto fragil",
-    "expected_plan": "Plan A",
     "target_metrics": [
       "COUNT(*)",
       "AVG(order_reviews.review_score)"
@@ -474,7 +435,6 @@
     "natural_language": "Cosmetics in PR where tamper evident seal was opened or violated.",
     "sql_filter": "products.product_category_name_english = 'health_beauty' AND customers.customer_state = 'PR'",
     "semantic_query": "broken seal opened product unsealed violado lacre rompido produto aberto",
-    "expected_plan": "Plan A",
     "target_metrics": [
       "COUNT(*)",
       "AVG(order_reviews.review_score)"
@@ -486,7 +446,6 @@
     "natural_language": "Food items in SP with crushed packaging or past expiration date.",
     "sql_filter": "products.product_category_name_english = 'food' AND customers.customer_state = 'SP'",
     "semantic_query": "dented can expired food validade vencida lata amassada",
-    "expected_plan": "Plan A",
     "target_metrics": [
       "COUNT(*)",
       "AVG(order_reviews.review_score)"
@@ -498,7 +457,6 @@
     "natural_language": "Power tools in RJ where motor burned out on first usage.",
     "sql_filter": "products.product_category_name_english = 'construction_tools_construction' AND customers.customer_state = 'RJ'",
     "semantic_query": "burned motor smoke sparks motor queimou soltou fumaca primeira utilizacao",
-    "expected_plan": "Plan A",
     "target_metrics": [
       "COUNT(*)",
       "AVG(order_reviews.review_score)"
@@ -510,7 +468,6 @@
     "natural_language": "All credit card orders where reviews mention polite and helpful customer service.",
     "sql_filter": "order_payments.payment_type = 'credit_card'",
     "semantic_query": "great service polite helpful attendant excelente atendimento muito prestativo",
-    "expected_plan": "Plan B",
     "target_metrics": [
       "COUNT(*)",
       "AVG(order_reviews.review_score)"
@@ -522,7 +479,6 @@
     "natural_language": "Boleto paid orders where customers complain about long waiting time.",
     "sql_filter": "order_payments.payment_type = 'boleto'",
     "semantic_query": "long wait delayed arrival took too long demora na entrega muito tempo",
-    "expected_plan": "Plan B",
     "target_metrics": [
       "COUNT(*)",
       "AVG(order_reviews.review_score)"
@@ -534,7 +490,6 @@
     "natural_language": "All orders in SP where customer complimented packaging and courier speed.",
     "sql_filter": "customers.customer_state = 'SP'",
     "semantic_query": "fast delivery well packaged perfectly packed entrega rapida bem embalado perfeito",
-    "expected_plan": "Plan B",
     "target_metrics": [
       "COUNT(*)",
       "AVG(order_reviews.review_score)"
@@ -546,7 +501,6 @@
     "natural_language": "All delivered orders where customers say the product exceeded expectations.",
     "sql_filter": "orders.order_status = 'delivered'",
     "semantic_query": "exceeded expectations great product beautiful wonderful superou expectativas maravilhoso",
-    "expected_plan": "Plan B",
     "target_metrics": [
       "COUNT(*)",
       "AVG(order_reviews.review_score)"
@@ -558,7 +512,6 @@
     "natural_language": "Single installment cash or card payments where wrong item was received.",
     "sql_filter": "order_payments.payment_installments = 1",
     "semantic_query": "received wrong item wrong product sent veio produto errado recebi outro item",
-    "expected_plan": "Plan B",
     "target_metrics": [
       "COUNT(*)",
       "AVG(order_reviews.review_score)"
@@ -570,7 +523,6 @@
     "natural_language": "Orders in RJ state where customer complained about postal courier delays.",
     "sql_filter": "customers.customer_state = 'RJ'",
     "semantic_query": "correios atrasou demora na entrega transportadora atrasada",
-    "expected_plan": "Plan B",
     "target_metrics": [
       "COUNT(*)",
       "AVG(orders.delivery_delay_days)"
@@ -582,7 +534,6 @@
     "natural_language": "Orders where freight was under R$20 praising cost effective shipping.",
     "sql_filter": "order_items.freight_value < 20",
     "semantic_query": "cheap shipping great freight fast cheap frete barato bom preco rapido",
-    "expected_plan": "Plan B",
     "target_metrics": [
       "COUNT(*)",
       "AVG(order_items.freight_value)"
@@ -594,10 +545,141 @@
     "natural_language": "All orders in MG state reviewing condition of the shipping box upon arrival.",
     "sql_filter": "customers.customer_state = 'MG'",
     "semantic_query": "box condition arrived intact safe package caixa chegou intacta bem protegida",
-    "expected_plan": "Plan B",
     "target_metrics": [
       "COUNT(*)",
       "AVG(order_reviews.review_score)"
+    ]
+  },
+  {
+    "id": "HQ_51",
+    "description": "Near-threshold selectivity (5k-20k orders, Plan B range)",
+    "natural_language": "Rio Grande do Sul orders where the delivery was late or never arrived.",
+    "sql_filter": "customers.customer_state = 'RS'",
+    "semantic_query": "late delivery order never arrived",
+    "target_metrics": [
+      "COUNT(*)",
+      "ROUND(SUM(order_payments.payment_value), 2)"
+    ]
+  },
+  {
+    "id": "HQ_52",
+    "description": "Near-threshold selectivity (5k-20k orders, Plan B range)",
+    "natural_language": "Minas Gerais orders where the customer received a different product than advertised.",
+    "sql_filter": "customers.customer_state = 'MG'",
+    "semantic_query": "received wrong product different from the advertisement",
+    "target_metrics": [
+      "COUNT(*)",
+      "ROUND(SUM(order_payments.payment_value), 2)"
+    ]
+  },
+  {
+    "id": "HQ_53",
+    "description": "Near-threshold selectivity (5k-20k orders, Plan B range)",
+    "natural_language": "Rio de Janeiro orders where only part of the purchase arrived.",
+    "sql_filter": "customers.customer_state = 'RJ'",
+    "semantic_query": "missing items incomplete order only part of the purchase arrived",
+    "target_metrics": [
+      "COUNT(*)",
+      "ROUND(SUM(order_payments.payment_value), 2)"
+    ]
+  },
+  {
+    "id": "HQ_54",
+    "description": "Near-threshold selectivity (5k-20k orders, Plan B range)",
+    "natural_language": "Boleto-paid orders with complaints about slow shipping.",
+    "sql_filter": "order_payments.payment_type = 'boleto'",
+    "semantic_query": "delivery took too long slow shipping",
+    "target_metrics": [
+      "COUNT(*)",
+      "ROUND(SUM(order_payments.payment_value), 2)"
+    ]
+  },
+  {
+    "id": "HQ_55",
+    "description": "Near-threshold selectivity (5k-20k orders, Plan B range)",
+    "natural_language": "Bed, bath and table orders with complaints about thin or poor-quality fabric.",
+    "sql_filter": "products.product_category_name_english = 'bed_bath_table'",
+    "semantic_query": "poor fabric quality thin sheets towels",
+    "target_metrics": [
+      "COUNT(*)",
+      "ROUND(SUM(order_payments.payment_value), 2)"
+    ]
+  },
+  {
+    "id": "HQ_56",
+    "description": "Near-threshold selectivity (5k-20k orders, Plan B range)",
+    "natural_language": "Health and beauty orders where customers suspect counterfeit products.",
+    "sql_filter": "products.product_category_name_english = 'health_beauty'",
+    "semantic_query": "fake counterfeit product not original",
+    "target_metrics": [
+      "COUNT(*)",
+      "ROUND(SUM(order_payments.payment_value), 2)"
+    ]
+  },
+  {
+    "id": "HQ_57",
+    "description": "Near-threshold selectivity (5k-20k orders, Plan B range)",
+    "natural_language": "Sports and leisure orders where the product broke quickly.",
+    "sql_filter": "products.product_category_name_english = 'sports_leisure'",
+    "semantic_query": "product broke after first use bad quality",
+    "target_metrics": [
+      "COUNT(*)",
+      "ROUND(SUM(order_payments.payment_value), 2)"
+    ]
+  },
+  {
+    "id": "HQ_58",
+    "description": "Near-threshold selectivity (5k-20k orders, Plan B range)",
+    "natural_language": "Furniture and decor orders with missing assembly parts or damage.",
+    "sql_filter": "products.product_category_name_english = 'furniture_decor'",
+    "semantic_query": "assembly parts missing screws furniture damaged",
+    "target_metrics": [
+      "COUNT(*)",
+      "ROUND(SUM(order_payments.payment_value), 2)"
+    ]
+  },
+  {
+    "id": "HQ_59",
+    "description": "Near-threshold selectivity (5k-20k orders, Plan B range)",
+    "natural_language": "Computer accessory orders with defective products.",
+    "sql_filter": "products.product_category_name_english = 'computers_accessories'",
+    "semantic_query": "does not work defective cable charger",
+    "target_metrics": [
+      "COUNT(*)",
+      "ROUND(SUM(order_payments.payment_value), 2)"
+    ]
+  },
+  {
+    "id": "HQ_60",
+    "description": "Near-threshold selectivity (5k-20k orders, Plan B range)",
+    "natural_language": "Late-delivered orders whose reviews complain about the delay.",
+    "sql_filter": "orders.delivery_delay_days > 0",
+    "semantic_query": "late delivery past the estimated date",
+    "target_metrics": [
+      "COUNT(*)",
+      "ROUND(SUM(order_payments.payment_value), 2)"
+    ]
+  },
+  {
+    "id": "HQ_61",
+    "description": "Near-threshold selectivity (5k-20k orders, Plan B range)",
+    "natural_language": "Orders paid in 8+ installments where customers say the product was not worth the price.",
+    "sql_filter": "order_payments.payment_installments >= 8",
+    "semantic_query": "expensive not worth the price",
+    "target_metrics": [
+      "COUNT(*)",
+      "ROUND(SUM(order_payments.payment_value), 2)"
+    ]
+  },
+  {
+    "id": "HQ_62",
+    "description": "Near-threshold selectivity (5k-20k orders, Plan B range)",
+    "natural_language": "Santa Catarina and Bahia orders complaining about seller support.",
+    "sql_filter": "customers.customer_state IN ('SC', 'BA')",
+    "semantic_query": "seller did not answer no customer support",
+    "target_metrics": [
+      "COUNT(*)",
+      "ROUND(SUM(order_payments.payment_value), 2)"
     ]
   }
 ]

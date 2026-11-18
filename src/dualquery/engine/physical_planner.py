@@ -1,19 +1,19 @@
 """
 DualQuery Cost-Based Physical Planner.
-Dynamically chooses and compiles:
-- Plan A: High-Selectivity Pushdown (Relational Filter -> Exact SIMD Cosine + BM25)
-- Plan B: Low-Selectivity Pushdown (HNSW Index + BM25 RRF -> Relational Hash Join)
+Chooses and compiles:
+- Plan A: High-Selectivity Pushdown (Relational Filter -> Exact Cosine Scan)
+- Plan B: Low-Selectivity (HNSW Index + BM25, fused with RRF -> Relational Filter)
 """
 
-import time
+import math
 import re
-from typing import List, Optional, Dict, Any
+from typing import List, Optional, Any
 import duckdb
 from pydantic import BaseModel, Field
 
 from dualquery.config import settings
 from dualquery.engine.cardinality_probe import CardinalityProbe, CardinalityEstimate
-from dualquery.engine.sql_normalizer import normalize_sql_expression, get_required_joins
+from dualquery.engine.sql_normalizer import get_required_joins
 
 
 class HybridQueryRequest(BaseModel):
@@ -26,15 +26,19 @@ class HybridQueryRequest(BaseModel):
             "COUNT(DISTINCT orders.order_id) AS total_orders",
             "ROUND(SUM(order_payments.payment_value), 2) AS total_amount"
         ],
-        description="Target OLAP aggregations"
+        description="Target OLAP aggregations, one table family per metric"
     )
-    limit: int = Field(default=5, description="Number of top cited review evidence records to return")
+    limit: int = Field(default=5, ge=1, le=50, description="Number of top cited review evidence records to return")
+    match_top_percent: float = Field(
+        default=1.0, gt=0.0, le=100.0,
+        description="A review matches the semantic query if it is among this % of all reviews closest to it (matched_aggregates)"
+    )
 
 
 class CompiledPlan(BaseModel):
     """The final compiled execution plan and metadata."""
-    plan_type: str = Field(description="'Plan A' (SIMD Scan) or 'Plan B' (HNSW + BM25 RRF)")
-    estimated_candidates: int = Field(description="Estimated number of matching orders (N_cand)")
+    plan_type: str = Field(description="'Plan A' (exact scan) or 'Plan B' (HNSW + BM25 RRF)")
+    estimated_candidates: int = Field(description="Number of matching orders (N_cand)")
     probe_latency_ms: float = Field(description="Cardinality probe duration in ms")
     sql: str = Field(description="Executable DuckDB SQL query string")
     parameters: List[Any] = Field(default_factory=list, description="Parameterized query arguments")
@@ -42,9 +46,15 @@ class CompiledPlan(BaseModel):
 
 class PhysicalPlanner:
     """
-    Cost-Based Optimizer switching at N_cand = 5,000 (calibrated for AVX2 SIMD scanning).
-    Guarantees 100% recall for narrow filters (Plan A) and <30ms latency for wide filters (Plan B).
+    Cost-based optimizer switching at N_cand = settings.PLAN_A_CARDINALITY_LIMIT.
+    Plan A is exact (100% recall by construction). Plan B sizes its ANN/BM25 candidate pools
+    by filter selectivity so that enough candidates survive the relational filter.
     """
+
+    # Plan B wants ~POOL_TARGET filtered survivors per retriever; pool = POOL_TARGET / selectivity.
+    POOL_TARGET = 100
+    MIN_POOL = 150
+    MAX_POOL = 2000
 
     def __init__(self, probe: Optional[CardinalityProbe] = None, threshold: int = settings.PLAN_A_CARDINALITY_LIMIT):
         self.probe = probe or CardinalityProbe()
@@ -53,8 +63,13 @@ class PhysicalPlanner:
     @staticmethod
     def _clean_bm25_keywords(text: str) -> str:
         """Extract clean alphanumeric keywords suitable for DuckDB FTS BM25."""
-        words = re.findall(r'\b[a-zA-Z0-9_\u00C0-\u00FF]{3,}\b', text)
+        words = re.findall(r'\b[a-zA-Z0-9_À-ÿ]{3,}\b', text)
         return " ".join(words[:6]) if words else text
+
+    @classmethod
+    def pool_size(cls, card_est: CardinalityEstimate) -> int:
+        selectivity = max(card_est.estimated_candidates, 1) / max(card_est.total_orders, 1)
+        return min(cls.MAX_POOL, max(cls.MIN_POOL, math.ceil(cls.POOL_TARGET / selectivity)))
 
     def plan(
         self,
@@ -63,143 +78,112 @@ class PhysicalPlanner:
         conn: duckdb.DuckDBPyConnection,
         force_plan: Optional[str] = None
     ) -> CompiledPlan:
-        """Evaluate cost models and compile the optimal DuckDB physical execution plan."""
-        # 1. Run Pre-Flight Cardinality Probe
-        card_est: CardinalityEstimate = self.probe.estimate(
-            conn, request.sql_filter, threshold=self.threshold
-        )
+        """Compile the cheaper physical plan. request.sql_filter must already be validated."""
+        card_est = self.probe.estimate(conn, request.sql_filter, threshold=self.threshold)
+        joins = get_required_joins(request.sql_filter)
 
+        if (force_plan or card_est.recommended_plan) == "Plan A":
+            return self._compile_plan_a(request, joins, query_vector, card_est)
         bm25_text = request.bm25_keywords or self._clean_bm25_keywords(request.semantic_query)
-        target_plan = force_plan or card_est.recommended_plan
-
-        if target_plan == "Plan A":
-            return self._compile_plan_a(request, query_vector, card_est)
-        else:
-            return self._compile_plan_b(request, query_vector, bm25_text, card_est)
-            return self._compile_plan_b(request, query_vector, bm25_text, card_est)
+        return self._compile_plan_b(request, joins, query_vector, bm25_text, card_est)
 
     def _compile_plan_a(
         self,
         request: HybridQueryRequest,
+        joins: str,
         query_vector: List[float],
         card_est: CardinalityEstimate
     ) -> CompiledPlan:
-        """
-        Compile Plan A: Relational Pushdown + Exact Hardware SIMD Cosine Distance.
-        Guarantees 100% vector recall on small filtered candidate subsets (N <= 1,500).
-        """
-        norm_filter = normalize_sql_expression(request.sql_filter) if request.sql_filter else "1=1"
-        relational_joins = get_required_joins(norm_filter, base_table="orders")
-
+        """Plan A: relational pushdown, then exact cosine distance over the filtered reviews."""
         sql = f"""
         WITH candidate_orders AS (
             SELECT DISTINCT orders.order_id
             FROM orders
-            {relational_joins}
-            WHERE {norm_filter}
-        ),
-        scored_reviews AS (
-            SELECT 
-                r.order_id,
-                r.review_id,
-                r.review_score,
-                COALESCE(r.review_comment_message, '') AS review_comment_message,
-                array_cosine_distance(r.embedding, ?::FLOAT[768]) AS cosine_distance
-            FROM order_reviews r
-            JOIN candidate_orders c ON r.order_id = c.order_id
-            WHERE r.embedding IS NOT NULL
-            ORDER BY cosine_distance ASC
-            LIMIT {request.limit}
+            {joins}
+            WHERE {request.sql_filter}
         )
-        SELECT 
-            s.review_id,
-            s.order_id,
-            s.review_score,
-            s.review_comment_message,
-            ROUND(s.cosine_distance, 4) AS distance
-        FROM scored_reviews s;
+        SELECT
+            r.review_id,
+            r.order_id,
+            r.review_score,
+            COALESCE(r.review_comment_message, '') AS review_comment_message,
+            ROUND(array_cosine_distance(r.embedding, ?::FLOAT[768]), 4) AS distance
+        FROM order_reviews r
+        JOIN candidate_orders c ON r.order_id = c.order_id
+        WHERE r.embedding IS NOT NULL
+        ORDER BY array_cosine_distance(r.embedding, ?::FLOAT[768]) ASC, r.review_id
+        LIMIT {request.limit};
         """
-
         return CompiledPlan(
             plan_type="Plan A",
             estimated_candidates=card_est.estimated_candidates,
             probe_latency_ms=card_est.probe_latency_ms,
             sql=sql,
-            parameters=[query_vector]
+            parameters=[query_vector, query_vector]
         )
 
     def _compile_plan_b(
         self,
         request: HybridQueryRequest,
+        joins: str,
         query_vector: List[float],
         bm25_text: str,
         card_est: CardinalityEstimate
     ) -> CompiledPlan:
         """
-        Compile Plan B: Native HNSW Vector + BM25 FTS pushed down in parallel,
-        fused via Reciprocal Rank Fusion (RRF k=60), then hash-joined to relational tables.
+        Plan B: HNSW top-k and BM25 top-k (pool sized by selectivity), fused with
+        Reciprocal Rank Fusion (k=60), then filtered by the relational predicate.
+        The vector CTE is a plain ORDER BY distance LIMIT k so DuckDB uses the HNSW index;
+        ranking happens in a separate CTE because a window function there forces a full scan.
         """
-        norm_filter = normalize_sql_expression(request.sql_filter) if request.sql_filter else "1=1"
-        relational_joins = get_required_joins(norm_filter, base_table="orders")
-
+        pool = self.pool_size(card_est)
         sql = f"""
-        WITH vector_matches AS (
-            SELECT 
-                review_id,
-                order_id,
-                review_score,
-                COALESCE(review_comment_message, '') AS review_comment_message,
-                ROW_NUMBER() OVER (ORDER BY array_cosine_distance(embedding, ?::FLOAT[768]) ASC) AS vec_rank
+        WITH vector_hits AS (
+            SELECT review_id, array_cosine_distance(embedding, ?::FLOAT[768]) AS dist
             FROM order_reviews
-            WHERE embedding IS NOT NULL
-            ORDER BY array_cosine_distance(embedding, ?::FLOAT[768]) ASC
-            LIMIT 150
+            ORDER BY dist
+            LIMIT {pool}
+        ),
+        vector_matches AS (
+            SELECT review_id, ROW_NUMBER() OVER (ORDER BY dist, review_id) AS vec_rank
+            FROM vector_hits
+            WHERE dist IS NOT NULL
         ),
         bm25_matches AS (
-            SELECT 
-                review_id,
-                order_id,
-                review_score,
-                COALESCE(review_comment_message, '') AS review_comment_message,
-                ROW_NUMBER() OVER (ORDER BY score DESC) AS bm25_rank
+            SELECT review_id, ROW_NUMBER() OVER (ORDER BY score DESC, review_id) AS bm25_rank
             FROM (
-                SELECT *, fts_main_order_reviews.match_bm25(review_id, ?) AS score
+                SELECT review_id, fts_main_order_reviews.match_bm25(review_id, ?) AS score
                 FROM order_reviews
             )
             WHERE score IS NOT NULL
             ORDER BY score DESC
-            LIMIT 150
+            LIMIT {pool}
         ),
         rrf_fused AS (
-            SELECT 
+            SELECT
                 COALESCE(v.review_id, b.review_id) AS review_id,
-                COALESCE(v.order_id, b.order_id) AS order_id,
-                COALESCE(v.review_score, b.review_score) AS review_score,
-                COALESCE(v.review_comment_message, b.review_comment_message) AS review_comment_message,
-                (COALESCE(1.0 / (60.0 + v.vec_rank), 0.0) + COALESCE(1.0 / (60.0 + b.bm25_rank), 0.0)) AS rrf_score
+                COALESCE(1.0 / (60.0 + v.vec_rank), 0.0) + COALESCE(1.0 / (60.0 + b.bm25_rank), 0.0) AS rrf_score
             FROM vector_matches v
             FULL OUTER JOIN bm25_matches b ON v.review_id = b.review_id
-            ORDER BY rrf_score DESC
-            LIMIT 100
         )
         SELECT DISTINCT
-            f.review_id,
-            f.order_id,
-            f.review_score,
-            f.review_comment_message,
+            r.review_id,
+            r.order_id,
+            r.review_score,
+            COALESCE(r.review_comment_message, '') AS review_comment_message,
             ROUND(f.rrf_score, 5) AS score
         FROM rrf_fused f
-        JOIN orders ON f.order_id = orders.order_id
-        {relational_joins}
-        WHERE {norm_filter}
-        ORDER BY f.rrf_score DESC
+        JOIN order_reviews r ON r.review_id = f.review_id
+        JOIN orders ON r.order_id = orders.order_id
+        {joins}
+        WHERE {request.sql_filter}
+        ORDER BY score DESC, r.review_id
         LIMIT {request.limit};
         """
-
         return CompiledPlan(
             plan_type="Plan B",
             estimated_candidates=card_est.estimated_candidates,
             probe_latency_ms=card_est.probe_latency_ms,
             sql=sql,
-            parameters=[query_vector, query_vector, bm25_text]
+            parameters=[query_vector, bm25_text]
         )

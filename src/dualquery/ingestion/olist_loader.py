@@ -200,7 +200,7 @@ class OlistLoader:
 
     def build_indexes(self, conn: duckdb.DuckDBPyConnection) -> None:
         """Compiles HNSW vector index and BM25 full-text search index."""
-        console.print("[yellow]Building HNSW Vector Index (Plan B SIMD search)...[/yellow]")
+        console.print("[yellow]Building HNSW Vector Index (Plan B)...[/yellow]")
         start_hnsw = time.perf_counter()
         conn.execute("""
             CREATE INDEX IF NOT EXISTS idx_reviews_embedding_hnsw
